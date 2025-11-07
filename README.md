@@ -44,18 +44,19 @@ All monitored equipment reports one of the following four critical states:
 
 ### B. State Transition Example (Lat Pulldown)
 
-[cite_start]The state transitions are governed by logic implemented in the **ESP32 firmware**[cite: 12].
+The state transitions are governed by logic implemented in the **ESP32 firmware**.
 
-#### MPU-6050 (Rep Counting) Logic
+---
 
-* [cite_start]**Sensor Input:** Reps counted (`Reps > 0` or `Reps = 0`)[cite: 14].
-    * [cite_start]`FREE` → `IN USE`: If Reps > 0 detected within a 5-second window[cite: 16].
-    * [cite_start]`IN USE` → `IDLE`: If Reps = 0 for 120 seconds[cite: 17].
-    * [cite_start]`IDLE` → `FREE`: If state remains `IDLE` for 300 seconds (5 minutes)[cite: 18].
+**MPU-6050 (Rep Counting) Logic**  
+- **FREE → IN USE:** If Reps > 0 detected within a 5-second window  
+- **IN USE → IDLE:** If Reps = 0 for 120 seconds  
+- **IDLE → FREE:** If state remains IDLE for 300 seconds (5 minutes)
 
-#### IR / Ultrasonic (Presence) Logic
+---
 
-* [cite_start]**Sensor Input:** Presence detected (`True` or `False`)[cite: 20].
-    * [cite_start]`FREE` → `IN USE`: If Presence = True for 10 consecutive seconds[cite: 21].
-    * [cite_start]`IN USE` → `FREE`: If Presence = False for 5 consecutive seconds[cite: 23].
+**IR / Ultrasonic (Presence) Logic**  
+- **FREE → IN USE:** If Presence = True for 10 consecutive seconds  
+- **IN USE → FREE:** If Presence = False for 5 consecutive seconds
+
 
