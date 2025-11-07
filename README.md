@@ -46,3 +46,12 @@ All monitored equipment reports one of the following four critical states:
 The state transitions are governed by logic implemented in the **ESP32 firmware**.
 
 **MPU-6050 (Rep Counting) Logic**
+FREE → IN USE: If Reps > 0 detected within a 5-second window
+IN USE → IDLE: If Reps = 0 for 120 seconds
+IDLE → FREE: If state remains IDLE for 300 seconds (5 minutes)
+
+
+**IR / Ultrasonic (Presence) Logic**
+FREE → IN USE: If Presence = True for 10 consecutive seconds
+IN USE → FREE: If Presence = False for 5 consecutive seconds
+
