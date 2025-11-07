@@ -81,7 +81,7 @@ The state transitions are governed by logic implemented in the **ESP32 firmware*
 
 ## 4. Communication & Data Flow
 
-1. **Sensor Layer:** All sensors (MPU-6050, IR, Ultrasonic, RFID, FSR) feed raw data into ESP32 GPIO pins.  
+1. **Sensor Layer:** All sensors (MPU-6050, IR, Ultrasonic, RFID, FSR, Current Sensor) feed raw data into ESP32 GPIO/ADC pins.  
 2. **Processing Layer:** ESP32 firmware interprets sensor signals, applies threshold logic, and updates equipment state.  
 3. **Transmission Layer:** Data is sent to the cloud via **MQTT** or **HTTP POST** in structured JSON format.  
 4. **Backend Layer:** Cloud server aggregates, analyzes, and visualizes data using a web dashboard or mobile interface.  
@@ -92,10 +92,12 @@ The state transitions are governed by logic implemented in the **ESP32 firmware*
 
 ```json
 {
-  "equipment_id": "LPD01",
+  "equipment_id": "TRD01",
   "state": "IN_USE",
   "sensor_data": {
-    "reps": 8,
+    "current": 2.3,
+    "power_status": "ON",
+    "reps": 0,
     "presence": true,
     "rfid_item_id": "RFID_203A7C",
     "rfid_status": "ITEM_PRESENT"
