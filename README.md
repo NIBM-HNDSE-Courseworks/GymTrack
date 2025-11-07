@@ -25,6 +25,7 @@ The system utilizes a central **ESP32 microcontroller** for data acquisition, pr
 | High-Traffic Area (e.g., Squat Rack) | Ultrasonic Sensor (HC-SR04) | Detects an object (person) standing within the defined usage zone. | Distance (cm), Presence detected (Boolean) |
 | Dumbbell Rack Slot (e.g., 20kg Dumbbell) | Force Sensitive Resistor (FSR) | Measures pressure to confirm if the dumbbell is present or removed. | Weight (kg), Dumbbell present (Boolean) |
 | Gym Accessories (e.g., Mats, Dumbbells, Belts) | **RFID Tag + Reader (RC522 Module)** | Each item is tagged with a unique RFID chip; reader detects tag presence for real-time inventory and usage tracking. | Item ID, Presence (Boolean), Last Scan Time |
+| Electric Equipment (e.g., Treadmill, Elliptical) | **ACS712 Current Sensor** | Measures current draw from the power line to detect when the machine is operating. | Current (A), Power ON/OFF (Boolean) |
 | Microcontroller | ESP32 (Wi-Fi Enabled) | Reads sensor data, applies initial logic, and sends data to the cloud API. | JSON payload via MQTT/HTTP |
 
 ---
@@ -67,6 +68,14 @@ The state transitions are governed by logic implemented in the **ESP32 firmware*
 - **ITEM REMOVED → ITEM PRESENT:** When RFID tag is re-detected on the rack  
 - **LOST/UNREGISTERED:** If item remains undetected beyond 24 hours  
 - Each RFID event logs **timestamp**, **item ID**, and **reader location** for asset management.
+
+---
+
+**Current Sensor Logic (Electrical Equipment Usage)**  
+- **FREE → IN USE:** If measured current > 0.5A for at least 3 seconds (indicates motor activity)  
+- **IN USE → IDLE:** If current < 0.5A continuously for 60 seconds  
+- **IDLE → FREE:** If current remains below 0.1A for 300 seconds (machine powered but unused)  
+- Periodic readings help monitor energy consumption and detect abnormal power draw for **maintenance alerts**.
 
 ---
 
