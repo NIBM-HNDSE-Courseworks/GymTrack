@@ -26,7 +26,7 @@ The system utilizes a central **ESP32 microcontroller** for data acquisition, pr
 | Dumbbell Rack Slot (e.g., 20kg Dumbbell) | Force Sensitive Resistor (FSR) | Measures pressure to confirm if the dumbbell is present or removed. | Weight (kg), Dumbbell present (Boolean) |
 | Gym Accessories (e.g., Mats, Dumbbells, Belts) | **RFID Tag + Reader (RC522 Module)** | Each item is tagged with a unique RFID chip; reader detects tag presence for real-time inventory and usage tracking. | Item ID, Presence (Boolean), Last Scan Time |
 | Electric Equipment (e.g., Treadmill, Elliptical) | **ACS712 Current Sensor** | Measures current draw from the power line to detect when the machine is operating. | Current (A), Power ON/OFF (Boolean) |
-| Microcontroller | ESP32 (Wi-Fi Enabled) | Reads sensor data, applies initial logic, and sends data to the cloud API. | JSON payload via MQTT/HTTP |
+| Microcontroller | ESP8266 (Wi-Fi Enabled) | Reads sensor data, applies initial logic, and sends data to the cloud API. | JSON payload via MQTT/HTTP |
 
 ---
 
