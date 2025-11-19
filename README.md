@@ -5,7 +5,7 @@
 
 ## 1. Project Overview
 **GymTrack** is an Internet of Things (IoT) solution designed to monitor gym equipment usage and facility capacity in real-time.  
-By leveraging various sensors connected via an **ESP32 microcontroller**, the system provides immediate feedback to customers regarding machine availability and generates insightful usage analytics for gym staff.
+By leveraging various sensors connected via an **ESP8266 microcontroller**, the system provides immediate feedback to customers regarding machine availability and generates insightful usage analytics for gym staff.
 
 **Primary goals:**
 * Accurately track the state of high-value gym equipment (**FREE, IN USE, IDLE, MAINTENANCE**).  
@@ -16,7 +16,7 @@ By leveraging various sensors connected via an **ESP32 microcontroller**, the sy
 ---
 
 ## 2. Hardware and Sensor Summary
-The system utilizes a central **ESP32 microcontroller** for data acquisition, processing raw sensor inputs into meaningful status before transmission.
+The system utilizes a central **ESP8266 microcontroller** for data acquisition, processing raw sensor inputs into meaningful status before transmission.
 
 | Equipment Type | Primary Sensor | Detection Mechanism | Data Output |
 |----------------|----------------|---------------------|--------------|
@@ -25,12 +25,12 @@ The system utilizes a central **ESP32 microcontroller** for data acquisition, pr
 | Electric Equipment (e.g., Treadmill, Elliptical) | **ACS712 Current Sensor** | Measures current draw from the power line to detect when the machine is operating. | Current (A), Power ON/OFF (Boolean) |
 | **User Capacity Monitoring** | **RFID Tag + Reader (User Tracking)** | Member's card is scanned upon entry and exit to monitor facility occupancy. | Member ID, Location (Entry/Exit), Timestamp |
 | Gym Accessories/Inventory | **RFID Tag + Reader (Equipment Tracking)** | Each item is tagged; reader detects tag presence for real-time inventory and usage tracking. | Item ID, Presence (Boolean), Last Scan Time |
-| Microcontroller | **ESP32 (Wi-Fi Enabled)** | Reads sensor data, applies initial logic, and sends data to the cloud API. | JSON payload via MQTT/HTTP |
+| Microcontroller | **ESP8266 (Wi-Fi Enabled)** | Reads sensor data, applies initial logic, and sends data to the cloud API. | JSON payload via MQTT/HTTP |
 
 ---
 
 ## 3. Core Tracking Logic & Data States
-The tracking function on the **ESP32** determines the current equipment status based on sensor readings and configured time windows.
+The tracking function on the **ESP8266** determines the current equipment status based on sensor readings and configured time windows.
 
 ### A. Core Data States
 All monitored equipment reports one of the following four critical states:
@@ -79,8 +79,8 @@ All monitored equipment reports one of the following four critical states:
 
 ## 4. Communication & Data Flow
 
-1.  **Sensor Layer:** All sensors (Ultrasonic, Load Cell, Current Sensor, RFID Readers) feed raw data into ESP32 GPIO/ADC pins.  
-2.  **Processing Layer:** ESP32 firmware interprets sensor signals, applies threshold logic, and updates equipment/user state.  
+1.  **Sensor Layer:** All sensors (Ultrasonic, Load Cell, Current Sensor, RFID Readers) feed raw data into ESP8266 GPIO/ADC pins.  
+2.  **Processing Layer:** ESP8266 firmware interprets sensor signals, applies threshold logic, and updates equipment/user state.  
 3.  **Transmission Layer:** Data is sent to the cloud via **MQTT** or **HTTP POST** in structured JSON format.  
 4.  **Backend Layer:** Cloud server aggregates, analyzes, and visualizes data using a web dashboard or mobile interface.  
 
