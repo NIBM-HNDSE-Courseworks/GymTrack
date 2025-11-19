@@ -1,4 +1,4 @@
-//----------RFID Tag + Reader (RC522 Module)----------
+//----------RFID - EquipmentTracking----------
 
 void setup() {
   // put your setup code here, to run once:

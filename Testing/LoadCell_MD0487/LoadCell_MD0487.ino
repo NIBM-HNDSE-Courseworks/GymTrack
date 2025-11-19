@@ -1,4 +1,4 @@
-//----------Force Sensitive Resistor (FSR)----------
+//----------Load cell(MD0487)----------
 
 void setup() {
   // put your setup code here, to run once:

@@ -1,4 +1,4 @@
-//----------IR Proximity Sensor----------
+//----------RFID - User Tracking----------
 
 void setup() {
   // put your setup code here, to run once:
