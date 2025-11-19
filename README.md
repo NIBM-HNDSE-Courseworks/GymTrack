@@ -79,10 +79,10 @@ All monitored equipment reports one of the following four critical states:
 
 ## 4. Communication & Data Flow
 
-1.  **Sensor Layer:** All sensors (Ultrasonic, Load Cell, Current Sensor, RFID Readers) feed raw data into ESP8266 GPIO/ADC pins.  
-2.  **Processing Layer:** ESP8266 firmware interprets sensor signals, applies threshold logic, and updates equipment/user state.  
-3.  **Transmission Layer:** Data is sent to the cloud via **MQTT** or **HTTP POST** in structured JSON format.  
-4.  **Backend Layer:** Cloud server aggregates, analyzes, and visualizes data using a web dashboard or mobile interface.  
+1.  **Sensor Layer:** All sensors (Ultrasonic, Load Cell, Current Sensor, RFID Readers) feed raw data into ESP8266 GPIO/ADC pins.  
+2.  **Processing Layer:** ESP8266 firmware interprets sensor signals, applies threshold logic, and updates equipment/user state.  
+3.  **Transmission Layer:** Data is sent to the cloud via **MQTT** or **HTTP POST** in structured JSON format.  
+4.  **Backend Layer:** Cloud server aggregates, analyzes, and visualizes data using a web dashboard or mobile interface.  
 
 ---
 
