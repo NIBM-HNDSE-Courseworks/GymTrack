@@ -38,12 +38,12 @@ function App() {
         let data = snapshot.val();
 
         if (data?.role) {
-          setUserRole(data.role); // "customer"
+          setUserRole(data.role);
         } else {
-          // Check staff_users if not found in customers
+          // Check staff_users
           snapshot = await get(ref(db, `staff_users/${currentUser.uid}`));
           data = snapshot.val();
-          if (data?.role) setUserRole(data.role); // "staff"
+          if (data?.role) setUserRole(data.role);
           else setUserRole(null);
         }
       } else {
@@ -51,6 +51,7 @@ function App() {
         setUserRole(null);
       }
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -82,14 +83,20 @@ function App() {
 
     return (
       <div className="dashboard-wrapper">
+        {/* ===== HEADER ===== */}
         <header className="App-header-title">
           <div className="header-content">
             <h1>GymTrack Dashboard 📊</h1>
-            <p>
-              Welcome to GymTrack! Monitor gym equipment and crowdedness in
-              real-time. Stay safe and track efficiently.
-            </p>
+
+            {/* SHOW LOGGED-IN USER IN HEADER */}
+            {user && (
+              <p className="logged-user">
+                Logged in as: <strong>{user.displayName || user.email}</strong>
+              </p>
+            )}
           </div>
+
+          {/* LOGIN / LOGOUT BUTTON */}
           {user ? (
             <button className="logout-button" onClick={handleLogout}>
               Logout
@@ -99,10 +106,22 @@ function App() {
           )}
         </header>
 
+        {/* ===== DESCRIPTION ONLY IN MIDDLE (NOT HEADER) ===== */}
+        {!user && (
+          <div className="home-description">
+            <p>
+              Welcome to GymTrack! 📊 <br />
+              Please login to see live gym equipment tracking and crowdedness.
+            </p>
+          </div>
+        )}
+
+        {/* ===== DASHBOARD GRID ===== */}
         {user && (
           <div className="dashboard-grid">
             {userRole === "staff" && <RFIDEquipment />}
-            <RFIDCapacity /> {/* Both staff & customer see capacity */}
+            <RFIDCapacity />
+
             {userRole === "customer" && (
               <>
                 <UltrasonicTracker equipmentId="SQT01" initialStatus="FREE" />
@@ -116,19 +135,11 @@ function App() {
           </div>
         )}
 
+        {/* ===== FOOTER FOR CUSTOMERS ===== */}
         {userRole === "customer" && user && (
           <div className="footer-note">
             <p>Data is transmitted as JSON via MQTT/HTTP by the ESP8266.</p>
             <p>Monitor gym crowdedness and equipment availability live! 🏋️‍♂️</p>
-          </div>
-        )}
-
-        {!user && (
-          <div className="home-description">
-            <p>
-              Welcome to GymTrack! 📊 <br />
-              Please login to see live gym equipment tracking and crowdedness.
-            </p>
           </div>
         )}
       </div>
