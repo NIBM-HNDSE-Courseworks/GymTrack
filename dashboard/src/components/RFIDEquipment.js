@@ -18,7 +18,6 @@ function RFIDEquipment() {
       >
         Mat RFID Status: {inventoryStatus} (ID: RFID_203A7C)
       </div>
-      <AddEquipmentButton equipmentType="RFID" />
     </div>
   );
 }

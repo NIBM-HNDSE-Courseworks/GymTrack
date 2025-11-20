@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./AddRFIDModal.css";
 import { db } from "../Firebase";
 import { ref, get, set } from "firebase/database";
@@ -9,10 +9,14 @@ function AddRFIDModal({ cardID, onClose, onConnect }) {
   const [selectedCard, setSelectedCard] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [assignedList, setAssignedList] = useState([]);
+  const [isReloading, setIsReloading] = useState(false);
+
+  const prevDataRef = useRef({ cards: [], customers: [], assigned: [] });
 
   const loadLists = async () => {
-    // 1) Users node -> find cards with no uid
     const usersSnap = await get(ref(db, "users"));
+    const customersSnap = await get(ref(db, "customers"));
+
     const newCardList = [];
     const assignedTemp = [];
 
@@ -20,23 +24,17 @@ function AddRFIDModal({ cardID, onClose, onConnect }) {
       const usersObj = usersSnap.val();
       for (const cardKey of Object.keys(usersObj)) {
         const node = usersObj[cardKey];
-        if (!node || !node.uid || node.uid === "") {
-          newCardList.push(cardKey);
-        } else {
-          assignedTemp.push({ cardID: cardKey, customerId: node.uid });
-        }
+        if (!node || !node.uid || node.uid === "") newCardList.push(cardKey);
+        else assignedTemp.push({ cardID: cardKey, customerId: node.uid });
       }
     }
 
-    // 2) Customers -> all customers
-    const customersSnap = await get(ref(db, "customers"));
     const newCustList = [];
     if (customersSnap.exists()) {
       const customersObj = customersSnap.val();
       for (const custKey of Object.keys(customersObj)) {
         const cust = customersObj[custKey];
         if (cust.role !== "customer") continue;
-        // check if any user already linked to this customer
         const isAssigned = Object.values(usersSnap.val() || {}).some(
           (u) => u.uid === custKey
         );
@@ -50,7 +48,6 @@ function AddRFIDModal({ cardID, onClose, onConnect }) {
       }
     }
 
-    // 3) Assigned list enrichment
     const enrichedAssigned = [];
     for (const a of assignedTemp) {
       const cSnap = await get(ref(db, `customers/${a.customerId}`));
@@ -61,33 +58,56 @@ function AddRFIDModal({ cardID, onClose, onConnect }) {
       });
     }
 
-    setUnassignedCards(newCardList);
-    setUnassignedCustomers(newCustList);
-    setAssignedList(enrichedAssigned);
+    // Only update state if there’s a change
+    const prev = prevDataRef.current;
+    const cardsChanged =
+      JSON.stringify(prev.cards) !== JSON.stringify(newCardList);
+    const customersChanged =
+      JSON.stringify(prev.customers) !== JSON.stringify(newCustList);
+    const assignedChanged =
+      JSON.stringify(prev.assigned) !== JSON.stringify(enrichedAssigned);
 
-    if (cardID && newCardList.includes(cardID)) setSelectedCard(cardID);
-    else setSelectedCard(newCardList.length ? newCardList[0] : null);
+    if (cardsChanged || customersChanged || assignedChanged) {
+      setUnassignedCards(newCardList);
+      setUnassignedCustomers(newCustList);
+      setAssignedList(enrichedAssigned);
 
-    setSelectedCustomer(newCustList.length ? newCustList[0]?.id : null);
+      // Keep previous selections if still valid
+      if (!newCardList.includes(selectedCard)) {
+        setSelectedCard(newCardList.length ? newCardList[0] : null);
+      }
+      if (!newCustList.some((c) => c.id === selectedCustomer)) {
+        setSelectedCustomer(newCustList.length ? newCustList[0].id : null);
+      }
+
+      prevDataRef.current = {
+        cards: newCardList,
+        customers: newCustList,
+        assigned: enrichedAssigned,
+      };
+    }
   };
 
   useEffect(() => {
     loadLists();
-  }, [cardID]);
+    setIsReloading(true);
+
+    const interval = setInterval(async () => {
+      setIsReloading(true);
+      await loadLists();
+      setTimeout(() => setIsReloading(false), 500);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [selectedCard, selectedCustomer]);
 
   const handleConnect = async () => {
     if (!selectedCard || !selectedCustomer)
       return alert("Please select one card and one customer.");
-
     try {
-      // Only save mapping in users/<cardID>/uid
       await set(ref(db, `users/${selectedCard}/uid`), selectedCustomer);
-
-      // Ensure registered flag exists
       await set(ref(db, `users/${selectedCard}/registered`), true);
-
       await loadLists();
-
       if (onConnect) onConnect();
       alert("Connected card to customer successfully.");
     } catch (err) {
@@ -99,6 +119,18 @@ function AddRFIDModal({ cardID, onClose, onConnect }) {
   return (
     <div className="modal-overlay">
       <div className="modal">
+        <div className="reload-status">
+          <span
+            className={`reload-icon ${isReloading ? "reloading" : ""}`}
+            title="Auto-reloading every 3 seconds"
+          >
+            &#x21bb;
+          </span>
+          <span className="reload-text">
+            {isReloading ? "Loading..." : "Updated"}
+          </span>
+        </div>
+
         <h2>User Connect</h2>
         <p>Connect unassigned RFID cards to customers without a card</p>
 

@@ -21,7 +21,53 @@
   color: #c9d1d9; /* Main text */
   border: 1px solid #30363d; /* Outline */
   box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+  position: relative; /* Needed for absolute positioning of the reload status */
 }
+
+/* --- NEW RELOAD STATUS STYLES --- */
+
+.reload-status {
+  position: absolute;
+  top: 15px; /* Adjust as needed */
+  right: 15px; /* Adjust as needed */
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #8b949e; /* Default text color */
+}
+
+.reload-icon {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease-out; /* Smooth stop/start */
+}
+
+.reload-status .reload-text {
+    /* Different color for 'Updated' vs 'Loading...' */
+    color: #4299e1; /* Use theme color for status text */
+}
+
+/* Keyframes for the continuous rotation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.reload-icon.reloading {
+  /* Apply animation when isReloading is true */
+  animation: spin 0.8s linear infinite; 
+  color: #4299e1; /* Highlight icon when loading */
+}
+
+/* --- END NEW RELOAD STATUS STYLES --- */
+
 
 /* Two column layout */
 .lists-row {

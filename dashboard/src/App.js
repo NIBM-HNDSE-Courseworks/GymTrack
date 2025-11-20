@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useState, useEffect } from "react";
 import "./App.css";
 
@@ -24,7 +23,8 @@ function App() {
   const [user, setUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
 
-  const [newCard, setNewCard] = useState(null);
+  const [openRFIDModal, setOpenRFIDModal] = useState(false);
+  const [lastScannedCard, setLastScannedCard] = useState(null);
 
   // AUTH LISTENER
   useEffect(() => {
@@ -45,7 +45,7 @@ function App() {
     });
   }, []);
 
-  // RFID CARD LISTENER
+  // RFID CARD LISTENER (no modal open here)
   useEffect(() => {
     const cardRef = ref(db, "last_scanned_card");
 
@@ -53,21 +53,7 @@ function App() {
       const cardID = snap.val();
       if (!cardID) return;
 
-      // Check users/<cardID>/uid - if not present or empty => newCard (unassigned)
-      const userRef = ref(db, `users/${cardID}`);
-      const userSnap = await get(userRef);
-
-      if (!userSnap.exists() || !userSnap.val().uid) {
-        // Unassigned card detected -> open User Connect modal and pass cardID
-        return setNewCard(cardID);
-      }
-
-      // Card assigned -> toggle inside (existing behaviour)
-      const inside = userSnap.val().inside || 0;
-      await set(ref(db, `users/${cardID}/inside`), inside === 0 ? 1 : 0);
-
-      // clear any modal/newCard state
-      setNewCard(null);
+      setLastScannedCard(cardID);
     });
   }, []);
 
@@ -91,7 +77,28 @@ function App() {
 
       {user && (
         <div className="dashboard-grid">
-          {userRole === "staff" && <RFIDEquipment />}
+          {userRole === "staff" && (
+            <>
+              <RFIDEquipment />
+
+              {/* 🔵 BUTTON TO OPEN MODAL */}
+              <button
+                onClick={() => setOpenRFIDModal(true)}
+                style={{
+                  padding: "10px",
+                  marginBottom: "15px",
+                  background: "#4e8cff",
+                  color: "white",
+                  borderRadius: "6px",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                Open RFID Connect
+              </button>
+            </>
+          )}
+
           <RFIDCapacity />
 
           {userRole === "customer" && (
@@ -104,12 +111,12 @@ function App() {
         </div>
       )}
 
-      {/* USER CONNECT (formerly AddRFIDModal) */}
-      {userRole === "staff" && newCard && (
+      {/* MODAL ONLY OPENS WHEN BUTTON IS CLICKED */}
+      {userRole === "staff" && openRFIDModal && (
         <AddRFIDModal
-          cardID={newCard}
-          onClose={() => setNewCard(null)}
-          onConnect={() => setNewCard(null)}
+          cardID={lastScannedCard}
+          onClose={() => setOpenRFIDModal(false)}
+          onConnect={() => setOpenRFIDModal(false)}
         />
       )}
 
