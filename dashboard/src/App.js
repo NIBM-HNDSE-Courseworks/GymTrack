@@ -2,25 +2,21 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 
-// Components
 import UltrasonicTracker from "./components/UltrasonicTracker";
 import CurrentSensorTracker from "./components/CurrentSensorTracker";
 import LoadCellTracker from "./components/LoadCellTracker";
 import RFIDEquipment from "./components/RFIDEquipment";
 import RFIDCapacity from "./components/RFIDCapacity";
+import AddRFIDModal from "./components/AddRFIDModal";
 
-// Auth Components
 import LoginButton from "./components/LoginButton";
 import AuthModal from "./components/AuthModal";
-
-// Admin Components
 import AdminEntry from "./components/AdminEntry";
 import AdminDashboard from "./components/AdminDashboard";
 
-// Firebase
 import { auth, db } from "./Firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { ref, get } from "firebase/database";
+import { ref, get, onValue, set } from "firebase/database";
 
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,37 +24,49 @@ function App() {
   const [user, setUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
 
+  const [newCard, setNewCard] = useState(null);
+
+  // AUTH LISTENER
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-
-        // First check customers
-        let snapshot = await get(ref(db, `customers/${currentUser.uid}`));
-        let data = snapshot.val();
-
-        if (data?.role) {
-          setUserRole(data.role);
-        } else {
-          // Check staff_users
-          snapshot = await get(ref(db, `staff_users/${currentUser.uid}`));
-          data = snapshot.val();
-          if (data?.role) setUserRole(data.role);
-          else setUserRole(null);
-        }
-      } else {
+    return onAuthStateChanged(auth, async (user) => {
+      if (!user) {
         setUser(null);
         setUserRole(null);
+        return;
       }
-    });
 
-    return () => unsubscribe();
+      setUser(user);
+
+      let snap = await get(ref(db, `customers/${user.uid}`));
+      if (snap.exists()) return setUserRole(snap.val().role);
+
+      snap = await get(ref(db, `staff_users/${user.uid}`));
+      setUserRole(snap.exists() ? snap.val().role : null);
+    });
   }, []);
 
-  const handleAdminRedirect = () => {
-    setIsModalOpen(false);
-    setCurrentRoute("admin-entry");
-  };
+  // RFID CARD LISTENER
+  useEffect(() => {
+    const cardRef = ref(db, "last_scanned_card");
+
+    return onValue(cardRef, async (snap) => {
+      const cardID = snap.val();
+      if (!cardID) return;
+
+      const userRef = ref(db, `users/${cardID}`);
+      const userSnap = await get(userRef);
+
+      // New user → show modal
+      if (!userSnap.exists() || !userSnap.val().registered) {
+        return setNewCard(cardID);
+      }
+
+      // Existing user → toggle inside
+      const inside = userSnap.val().inside || 0;
+      await set(ref(db, `users/${cardID}/inside`), inside === 0 ? 1 : 0);
+      setNewCard(null);
+    });
+  }, []);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -67,93 +75,45 @@ function App() {
     setCurrentRoute("dashboard");
   };
 
-  const renderContent = () => {
-    if (currentRoute === "admin-entry") {
-      return (
-        <AdminEntry
-          onLoginSuccess={() => setCurrentRoute("staff-dashboard")}
-          onClose={() => setCurrentRoute("dashboard")}
-        />
-      );
-    }
-
-    if (currentRoute === "staff-dashboard") {
-      return <AdminDashboard onLogout={handleLogout} />;
-    }
-
-    return (
-      <div className="dashboard-wrapper">
-        {/* ===== HEADER ===== */}
-        <header className="App-header-title">
-          <div className="header-content">
-            <h1>GymTrack Dashboard 📊</h1>
-
-            {/* SHOW LOGGED-IN USER IN HEADER */}
-            {user && (
-              <p className="logged-user">
-                Logged in as: <strong>{user.displayName || user.email}</strong>
-              </p>
-            )}
-          </div>
-
-          {/* LOGIN / LOGOUT BUTTON */}
-          {user ? (
-            <button className="logout-button" onClick={handleLogout}>
-              Logout
-            </button>
-          ) : (
-            <LoginButton onClick={() => setIsModalOpen(true)} />
-          )}
-        </header>
-
-        {/* ===== DESCRIPTION ONLY IN MIDDLE (NOT HEADER) ===== */}
-        {!user && (
-          <div className="home-description">
-            <p>
-              Welcome to GymTrack! 📊 <br />
-              Please login to see live gym equipment tracking and crowdedness.
-            </p>
-          </div>
-        )}
-
-        {/* ===== DASHBOARD GRID ===== */}
-        {user && (
-          <div className="dashboard-grid">
-            {userRole === "staff" && <RFIDEquipment />}
-            <RFIDCapacity />
-
-            {userRole === "customer" && (
-              <>
-                <UltrasonicTracker equipmentId="SQT01" initialStatus="FREE" />
-                <CurrentSensorTracker
-                  equipmentId="TRD01"
-                  initialStatus="FREE"
-                />
-                <LoadCellTracker equipmentId="DMR05" />
-              </>
-            )}
-          </div>
-        )}
-
-        {/* ===== FOOTER FOR CUSTOMERS ===== */}
-        {userRole === "customer" && user && (
-          <div className="footer-note">
-            <p>Data is transmitted as JSON via MQTT/HTTP by the ESP8266.</p>
-            <p>Monitor gym crowdedness and equipment availability live! 🏋️‍♂️</p>
-          </div>
-        )}
-      </div>
-    );
-  };
-
   return (
     <div className="App">
-      {renderContent()}
+      <header className="App-header-title">
+        <h1>GymTrack Dashboard 📊</h1>
+
+        {user && <p>Logged in as: {user.displayName || user.email}</p>}
+
+        {!user && <LoginButton onClick={() => setIsModalOpen(true)} />}
+        {user && <button onClick={handleLogout}>Logout</button>}
+      </header>
+
+      {user && (
+        <div className="dashboard-grid">
+          {userRole === "staff" && <RFIDEquipment />}
+          <RFIDCapacity />
+
+          {userRole === "customer" && (
+            <>
+              <UltrasonicTracker equipmentId="SQT01" initialStatus="FREE" />
+              <CurrentSensorTracker equipmentId="TRD01" initialStatus="FREE" />
+              <LoadCellTracker equipmentId="DMR05" />
+            </>
+          )}
+        </div>
+      )}
+
+      {/* NEW USER POPUP */}
+      {userRole === "staff" && newCard && (
+        <AddRFIDModal
+          cardID={newCard}
+          onClose={() => setNewCard(null)}
+          onAdd={() => setNewCard(null)}
+        />
+      )}
 
       <AuthModal
         isVisible={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onAdminRedirect={handleAdminRedirect}
+        onAdminRedirect={() => setCurrentRoute("admin-entry")}
       />
     </div>
   );
