@@ -4,7 +4,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
-  signOut, // <span style="color:orange">IMPORT signOut</span>
+  signOut,
 } from "firebase/auth";
 import { ref, set } from "firebase/database";
 import "./AuthModal.css";
@@ -71,14 +71,12 @@ function AuthModal({ isVisible, onClose, onAdminRedirect }) {
         createdAt: new Date().toISOString(),
       });
 
-      // <span style="color:orange">IMPORTANT FIX: Sign out the user immediately after signup.</span>
-      // <span style="color:orange">This prevents the onAuthStateChanged listener from auto-logging them in.</span>
       await signOut(auth);
 
       alert("Customer signed up successfully! Please log in.");
 
       clearFields();
-      setAuthMode("login"); // <span style="color:white">Switch to login view</span>
+      setAuthMode("login");
     } catch (err) {
       alert("Signup failed: " + err.message);
     }
@@ -141,7 +139,6 @@ function AuthModal({ isVisible, onClose, onAdminRedirect }) {
           ×
         </button>
 
-        {/* FIX: FORM INLINE — NO REMOUNTING */}
         <form
           className="auth-form"
           onSubmit={
@@ -159,6 +156,7 @@ function AuthModal({ isVisible, onClose, onAdminRedirect }) {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                placeholder="Enter your full name"
                 required
               />
             </>
@@ -169,6 +167,7 @@ function AuthModal({ isVisible, onClose, onAdminRedirect }) {
             type="text"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
             required
           />
 
@@ -177,6 +176,7 @@ function AuthModal({ isVisible, onClose, onAdminRedirect }) {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
             required
           />
 
@@ -187,6 +187,7 @@ function AuthModal({ isVisible, onClose, onAdminRedirect }) {
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Re-enter your password"
                 required
               />
             </>

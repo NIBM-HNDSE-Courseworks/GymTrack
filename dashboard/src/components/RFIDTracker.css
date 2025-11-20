@@ -1,5 +1,8 @@
-/* src/components/RFIDTracker.css */
+/* src/components/RFIDTracker.css (Combined) */
 
+/* -------------------------------------- */
+/* ## Base Tracker Card Styles 📊        */
+/* -------------------------------------- */
 .tracker-card {
   /* Main card container style */
   background-color: #161b22; /* Slightly darker than main background */
@@ -15,7 +18,7 @@
 }
 
 .tracker-card h2 {
-  color: #58a6ff; /* Blue color for heading */
+  color: #58a6ff; /* Blue color for heading (Will be overwritten by .capacity-card h2) */
   margin-top: 0;
   margin-bottom: 20px;
 }
@@ -23,14 +26,17 @@
 .status-indicator {
   padding: 15px;
   border-radius: 8px;
-  color: white; /* Text color within the indicator (will be overwritten by capacity-indicator) */
+  color: white; /* Default text color */
   font-size: 1.2em;
   font-weight: bold;
   margin-bottom: 20px;
   transition: background-color 0.3s ease;
 }
 
-/* Minimalist Button Styling */
+/* -------------------------------------- */
+/* ## Minimalist Button Styling 🔘       */
+/* (Used by other tracker cards)          */
+/* -------------------------------------- */
 .tracker-card button {
   background-color: #161b22; /* Dark background */
   color: #58a6ff; /* Blue text */
@@ -48,23 +54,43 @@
   color: #0d1117; /* Dark text on hover */
 }
 
-/* --- Capacity Card Specific Styles --- */
+
+/* -------------------------------------- */
+/* ## Capacity Card Specific Overrides 🏋️ */
+/* -------------------------------------- */
+
+.capacity-card {
+  /* Overrides tracker-card background for a slightly distinct look */
+  background-color: #161b22; 
+  /* Inherits display: flex, border, radius, shadow, etc., from .tracker-card */
+  align-items: center;
+  padding: 25px; /* Use standard padding */
+}
+
+.capacity-card h2 {
+  /* Overrides base h2 color for better contrast/emphasis in the capacity card */
+  color: white;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #4e8cff; /* Blue underline */
+  padding-bottom: 5px;
+}
 
 .capacity-indicator {
-  /* Ensures dark text on colored background (red/green) for contrast */
-  color: #0d1117; 
-  font-size: 1.5em;
+  /* Overrides base .status-indicator padding/size */
+  width: 100%;
+  padding: 10px 0;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  text-align: center;
+  transition: background-color 0.5s ease;
+  /* Ensure text is white or very dark for contrast on dynamic color */
+  color: white; /* Keeping white text for dynamic background colors */
+  font-size: 1.5em; /* Increase font size */
 }
 
-.capacity-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-top: auto; /* Pushes the buttons to the bottom of the card */
-}
-
-.capacity-buttons button {
-  flex-grow: 1; /* Make buttons equally wide */
-  max-width: 150px;
-  /* Inherits minimalist button styling from .tracker-card button */
+.capacity-display {
+  /* Center and format the number display */
+  text-align: center;
+  padding: 10px 0;
+  width: 100%;
 }
