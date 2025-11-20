@@ -109,7 +109,7 @@ function AddRFIDModal({ cardID, onClose, onConnect }) {
       await set(ref(db, `users/${selectedCard}/uid`), selectedCustomer);
       await set(ref(db, `users/${selectedCard}/registered`), true);
       await loadLists();
-      if (onConnect) onConnect();
+      // if (onConnect) onConnect();
       alert("Connected card to customer successfully.");
     } catch (err) {
       console.error("Connect error:", err);

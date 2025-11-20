@@ -80,7 +80,7 @@
 
 .staff-table th {
     padding: 12px 15px;
-    text-align: left;
+    text-align: center;
     color: #4299e1;
     font-weight: 700;
     border-right: 1px solid #30363d; /* NEW: vertical column lines */

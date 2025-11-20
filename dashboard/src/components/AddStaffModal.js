@@ -1,13 +1,8 @@
 // src/components/AddStaffModal.js
 import React, { useState } from "react";
-// Reusing AuthModal.css for modal backdrop and general styling
 import "../components/AuthModal.css";
-// Import the staff creation function
-import { createStaffAccount } from "../Firebase"; // Assuming the path is correct
+import { createStaffAccount } from "../Firebase";
 
-/**
- * Modal form for adding a new staff member.
- */
 function AddStaffModal({ onClose, onAdd }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -16,7 +11,6 @@ function AddStaffModal({ onClose, onAdd }) {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Helper to convert Firebase error codes to user-friendly messages
   const getErrorMessage = (errorCode) => {
     switch (errorCode) {
       case "auth/email-already-in-use":
@@ -31,27 +25,20 @@ function AddStaffModal({ onClose, onAdd }) {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // 🔥 THIS FIXES EVERYTHING!
-
+    e.preventDefault();
     try {
-      // 2. Call the Firebase utility function
       await createStaffAccount({ name, email, password });
-
-      // Success
       alert(`Staff member ${name} (${email}) created successfully!`);
       onAdd();
       onClose();
     } catch (err) {
-      // Improved error handling based on the thrown message
       let errorCode = "unknown-error";
       if (err.message) {
-        // This extracts the code like 'auth/email-already-in-use'
         errorCode = err.message
           .replace("Firebase: Error (", "")
           .replace(").", "")
           .trim();
       }
-
       setError(getErrorMessage(errorCode));
     } finally {
       setIsLoading(false);
@@ -59,9 +46,7 @@ function AddStaffModal({ onClose, onAdd }) {
   };
 
   return (
-    // The modal-overlay is reused for the backdrop
     <div className="modal-overlay" onClick={(e) => e.stopPropagation()}>
-      {/* The auth-card style is reused for the modal card */}
       <div className="auth-card" onClick={(e) => e.stopPropagation()}>
         <button className="close-button" onClick={onClose} disabled={isLoading}>
           &times;
@@ -81,6 +66,7 @@ function AddStaffModal({ onClose, onAdd }) {
             id="staffName"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            placeholder="Enter full name"
             required
             disabled={isLoading}
           />
@@ -91,6 +77,7 @@ function AddStaffModal({ onClose, onAdd }) {
             id="staffEmail"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter email address"
             required
             disabled={isLoading}
           />
@@ -101,6 +88,7 @@ function AddStaffModal({ onClose, onAdd }) {
             id="staffPassword"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter password"
             required
             disabled={isLoading}
           />
@@ -111,6 +99,7 @@ function AddStaffModal({ onClose, onAdd }) {
             id="confirmStaffPassword"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Re-enter password"
             required
             disabled={isLoading}
           />
