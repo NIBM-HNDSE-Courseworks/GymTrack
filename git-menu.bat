@@ -22,67 +22,55 @@ echo Wrong choice.
 pause
 exit /b
 
-
 :doPull
 echo Pulling latest changes...
 git fetch
 git pull origin main
-
 if %errorlevel% neq 0 (
     echo Merge conflict detected!
-    echo --------------------------------------------
     git status
-    echo --------------------------------------------
-    echo Fix the conflicts, then run:
+    echo Fix conflicts, then run:
     echo git add . && git commit -m "fix"
 )
 pause
 exit /b
 
-
 :doPush
 echo Staging all files except git-menu.bat, Commit.bat, and node_modules...
-
-:: Add all modified and new files except skipped ones
+:: Stage all modified/untracked files EXCEPT skipped ones
 for /f "delims=" %%f in ('git ls-files --others --modified --exclude-standard') do (
-    if /i not "%%f"=="git-menu.bat" if /i not "%%f"=="Commit.bat" if /i not "%%f:~0,14"=="dashboard/node_modules" (
+    if /i not "%%f"=="git-menu.bat" if /i not "%%f"=="Commit.bat" (
         git add "%%f"
     )
 )
 
-
-
-:: Show modified/staged files for verification
+:: Show staged files
 echo ============================================
 echo Files changed and staged for commit:
 echo ============================================
 git status -s
 
-:: Ask user for confirmation
+:: Ask for confirmation to commit new changes
 set /p confirm=Do you want to commit these changes? (y/n): 
-if /i not "%confirm%"=="y" (
-    echo Commit canceled.
-    pause
-    exit /b
+if /i "%confirm%"=="y" (
+    set /p msg=Enter commit message: 
+    git commit -m "%msg%"
+    if %errorlevel% neq 0 (
+        echo Commit failed. Maybe no new changes.
+    ) else (
+        echo Commit successful!
+    )
+) else (
+    echo Skipping commit.
 )
 
-:: Enter commit message
-set /p msg=Enter commit message: 
-
-:: Commit changes
-git commit -m "%msg%"
-
-if %errorlevel% neq 0 (
-    echo Commit failed. Maybe no changes to commit.
-    pause
-    exit /b
-)
-
-:: Push changes
+:: Push all commits, including previous ones
+echo Pushing all commits to GitHub...
 git push origin main
-
 if %errorlevel% neq 0 (
-    echo Push failed. You may need to pull first.
+    echo Push failed. You may need to pull first or resolve conflicts.
+) else (
+    echo Push successful!
 )
 
 pause
