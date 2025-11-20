@@ -41,17 +41,44 @@ exit /b
 
 
 :doPush
-echo Staging all files except git-menu.bat and node_modules...
+echo Staging all files except git-menu.bat, Commit.bat, and node_modules...
 
-:: Stage all files, then unstage the ones we want to skip
-git add .
-git reset git-menu.bat
-git reset -q dashboard/node_modules
+:: Add all modified and new files except skipped ones
+for /f "delims=" %%f in ('git ls-files --others --modified --exclude-standard') do (
+    if /i not "%%f"=="git-menu.bat" if /i not "%%f"=="Commit.bat" if /i not "%%f:~0,14"=="dashboard/node_modules" (
+        git add "%%f"
+    )
+)
 
-echo Enter commit message:
-set /p msg=
 
+
+:: Show modified/staged files for verification
+echo ============================================
+echo Files changed and staged for commit:
+echo ============================================
+git status -s
+
+:: Ask user for confirmation
+set /p confirm=Do you want to commit these changes? (y/n): 
+if /i not "%confirm%"=="y" (
+    echo Commit canceled.
+    pause
+    exit /b
+)
+
+:: Enter commit message
+set /p msg=Enter commit message: 
+
+:: Commit changes
 git commit -m "%msg%"
+
+if %errorlevel% neq 0 (
+    echo Commit failed. Maybe no changes to commit.
+    pause
+    exit /b
+)
+
+:: Push changes
 git push origin main
 
 if %errorlevel% neq 0 (
