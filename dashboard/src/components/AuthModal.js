@@ -4,6 +4,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
+  signOut, // <span style="color:orange">IMPORT signOut</span>
 } from "firebase/auth";
 import { ref, set } from "firebase/database";
 import "./AuthModal.css";
@@ -20,6 +21,13 @@ function AuthModal({ isVisible, onClose, onAdminRedirect }) {
   const [adminKeyCount, setAdminKeyCount] = useState(0);
   const ANIMATION_DURATION = 300;
 
+  const clearFields = useCallback(() => {
+    setEmail("");
+    setPassword("");
+    setName("");
+    setConfirmPassword("");
+  }, []);
+
   const handleClose = useCallback(() => {
     onClose();
   }, [onClose]);
@@ -30,6 +38,7 @@ function AuthModal({ isVisible, onClose, onAdminRedirect }) {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       alert("Login success!");
+      clearFields();
       handleClose();
     } catch (err) {
       alert("Login failed: " + err.message);
@@ -62,8 +71,14 @@ function AuthModal({ isVisible, onClose, onAdminRedirect }) {
         createdAt: new Date().toISOString(),
       });
 
-      alert("Customer signed up successfully!");
-      handleClose();
+      // <span style="color:orange">IMPORTANT FIX: Sign out the user immediately after signup.</span>
+      // <span style="color:orange">This prevents the onAuthStateChanged listener from auto-logging them in.</span>
+      await signOut(auth);
+
+      alert("Customer signed up successfully! Please log in.");
+
+      clearFields();
+      setAuthMode("login"); // <span style="color:white">Switch to login view</span>
     } catch (err) {
       alert("Signup failed: " + err.message);
     }
@@ -99,6 +114,7 @@ function AuthModal({ isVisible, onClose, onAdminRedirect }) {
           if (n === 5) {
             if (onAdminRedirect) onAdminRedirect();
             else window.open("/admin-entry", "_blank");
+            handleClose();
             return 0;
           }
           return n;
@@ -108,7 +124,7 @@ function AuthModal({ isVisible, onClose, onAdminRedirect }) {
 
     document.addEventListener("keydown", handleKeydown);
     return () => document.removeEventListener("keydown", handleKeydown);
-  }, [shouldRender, onAdminRedirect]);
+  }, [shouldRender, onAdminRedirect, handleClose]);
 
   if (!shouldRender) return null;
 

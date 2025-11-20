@@ -1,53 +1,128 @@
 /* src/App.css - Main Layout & Global Dark Theme */
 
 /* 1. Full Screen and Dark Background */
-body, #root, .App {
-    min-height: 100vh;
-    margin: 0;
-    padding: 0;
+body,
+#root,
+.App {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: flex; /* Makes the app container a flex item */
+  flex-direction: column; /* Stacks header, content, and footer vertically */
 }
 
 .App {
-    text-align: center;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    /* Main Dark Mode Background: Very dark, almost black */
-    background-color: #0d1117; 
-    color: #c9d1d9; /* Light gray text for high contrast */
+  text-align: center;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  /* Main Dark Mode Background: Very dark, almost black */
+  background-color: #0d1117;
+  color: #c9d1d9; /* Light gray text for high contrast */
+  flex-grow: 1; /* Allows the App to fill the rest of the height */
 }
 
 /* 2. Header Style */
 .App-header-title {
-    background-color: #161b22; 
-    padding: 20px;
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8); 
+  background-color: #161b22;
+  padding: 20px;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  flex-shrink: 0; /* Prevents header from shrinking */
 }
 
-.header-content {
-    text-align: left;
+.header-actions {
+  display: flex;
+  align-items: center;
 }
 
-/* REMOVED .login-button STYLES - now in LoginButton.css */
-
-
-/* 3. Dashboard Grid Layout (Stacked) */
+/* 3. Dashboard Grid Layout (Responsive Grid) */
 .dashboard-grid {
-    display: flex;
-    flex-direction: column; 
-    align-items: center; 
-    gap: 30px;
-    padding: 30px 20px 60px 20px;
+  flex-grow: 1; /* Makes the grid fill the remaining height */
+  display: grid;
+  /* Responsive columns: 2 columns for large screens, 1 for small */
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 30px;
+  padding: 30px;
+  max-width: 1400px; /* Max width for central alignment */
+  width: 100%;
+  margin: 0 auto; /* Center the grid */
+  align-items: start; /* Align items to the top of their grid cell */
+}
+
+/* Full-width component for staff controls or welcome panel */
+.staff-controls,
+.welcome-panel {
+  grid-column: 1 / -1; /* Spans all columns */
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #161b22;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* Component Styling for full-page integration */
+.tracker-card {
+  background-color: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
+  height: auto; /* Allow card height to be natural */
+  min-height: 150px;
+}
+
+.tracker-card h2 {
+  margin-top: 0;
+  color: #58a6ff; /* Keep blue accent for titles */
+}
+
+.tracker-card p {
+  font-size: 1.1em;
+  color: #c9d1d9;
+}
+
+/* Capacity specific styling */
+.capacity-card {
+  grid-column: 1 / -1; /* Capacity spans full width */
+}
+.capacity-indicator {
+  font-size: 1.5em;
+  font-weight: bold;
+  padding: 10px;
+  border-radius: 4px;
+  margin: 15px 0;
+  color: #0d1117; /* Dark text for status indicators */
+}
+
+/* MODIFIED: Changed buttons from bright green to dark background with blue border */
+.capacity-buttons button {
+  padding: 8px 15px;
+  margin: 0 5px;
+  background-color: #161b22; /* Dark background */
+  color: #58a6ff; /* Blue text */
+  border: 1px solid #58a6ff; /* Blue border accent */
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.capacity-buttons button:hover {
+  background-color: #58a6ff; /* Hover makes it solid blue */
+  color: #0d1117; /* Dark text on hover */
 }
 
 /* 4. Footer */
 .footer-note {
-    padding: 20px;
-    border-top: 1px solid #30363d; 
-    background-color: #161b22;
-    margin-top: auto; 
-    font-size: 0.9em;
-    color: #8b949e;
+  padding: 20px;
+  border-top: 1px solid #30363d;
+  background-color: #161b22;
+  margin-top: auto;
+  font-size: 0.9em;
+  color: #8b949e;
+  flex-shrink: 0; /* Prevents footer from shrinking */
 }

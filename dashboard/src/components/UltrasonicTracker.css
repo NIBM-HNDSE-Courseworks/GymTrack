@@ -2,52 +2,56 @@
 
 /* --- Card/Group Styling (Shared across all trackers) --- */
 .tracker-group {
-    border: 1px solid #30363d; 
-    background-color: #161b22; 
-    border-radius: 10px;
-    padding: 20px;
-    max-width: 700px;
-    width: 90%; 
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7); 
+  /* Aligned with minimalist dark theme components */
+  border: 1px solid #30363d;
+  background-color: #161b22;
+  border-radius: 10px;
+  padding: 20px;
+  /* Removed max-width/width to allow it to fully integrate into the dashboard-grid */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+  width: 100%; /* Ensure it fills the grid cell */
 }
 
 .group-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 2px solid #30363d; 
-    padding-bottom: 10px;
-    margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #30363d;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 .group-header h2 {
-    font-size: 1.4em;
-    color: #e0e0e0;
-    margin: 0;
+  /* MODIFIED: Use the blue accent for primary titles */
+  font-size: 1.4em;
+  color: #58a6ff;
+  margin: 0;
 }
 
 .tracker-card {
-    padding: 10px 0;
-    text-align: left;
-    color: #c9d1d9; 
+  padding: 10px 0;
+  text-align: left;
+  color: #c9d1d9; /* Standard light text color */
 }
 
 .tracker-card h3 {
-    color: #ffffff;
+  /* MODIFIED: Use standard light text color, bold font is implicit for headings */
+  color: #c9d1d9;
 }
 
 .status-indicator {
-    padding: 12px;
-    border-radius: 4px;
-    text-align: center;
-    margin: 10px 0;
-    font-size: 1.2em;
-    color: white; 
-    font-weight: bold;
+  padding: 12px;
+  border-radius: 4px;
+  text-align: center;
+  margin: 10px 0;
+  font-size: 1.2em;
+  /* MODIFIED: Status indicators must use functional colors (red/green) but text must contrast well */
+  color: #0d1117; 
+  font-weight: bold;
 }
 
 .logic-note {
-    font-size: 0.85em;
-    color: #8b949e; 
-    margin-top: 15px;
+  font-size: 0.85em;
+  color: #8b949e; /* Muted gray for secondary information */
+  margin-top: 15px;
 }

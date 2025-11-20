@@ -1,3 +1,4 @@
+// src/components/AddRFIDModal.js
 import React, { useEffect, useState, useRef } from "react";
 import "./AddRFIDModal.css";
 import { db } from "../Firebase";
@@ -118,7 +119,7 @@ function AddRFIDModal({ cardID, onClose, onConnect }) {
 
   return (
     <div className="modal-overlay">
-      <div className="modal">
+      <div className="modal add-rfid-modal">
         <div className="reload-status">
           <span
             className={`reload-icon ${isReloading ? "reloading" : ""}`}

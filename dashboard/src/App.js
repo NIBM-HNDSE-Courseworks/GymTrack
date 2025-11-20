@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 
+// <span style="color:white">Component Imports (unchanged)</span>
 import UltrasonicTracker from "./components/UltrasonicTracker";
 import CurrentSensorTracker from "./components/CurrentSensorTracker";
 import LoadCellTracker from "./components/LoadCellTracker";
@@ -15,7 +16,7 @@ import AdminDashboard from "./components/AdminDashboard";
 
 import { auth, db } from "./Firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { ref, get, onValue, set } from "firebase/database";
+import { ref, get, onValue } from "firebase/database";
 
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -25,6 +26,9 @@ function App() {
 
   const [openRFIDModal, setOpenRFIDModal] = useState(false);
   const [lastScannedCard, setLastScannedCard] = useState(null);
+
+  // NEW: Prevent auto-login loop for admin
+  const [adminLoggedOut, setAdminLoggedOut] = useState(false);
 
   // AUTH LISTENER
   useEffect(() => {
@@ -37,6 +41,7 @@ function App() {
 
       setUser(user);
 
+      // <span style="color:white">FETCH ROLE LOGIC</span>
       let snap = await get(ref(db, `customers/${user.uid}`));
       if (snap.exists()) return setUserRole(snap.val().role);
 
@@ -45,14 +50,12 @@ function App() {
     });
   }, []);
 
-  // RFID CARD LISTENER (no modal open here)
+  // RFID CARD LISTENER
   useEffect(() => {
     const cardRef = ref(db, "last_scanned_card");
-
-    return onValue(cardRef, async (snap) => {
+    return onValue(cardRef, (snap) => {
       const cardID = snap.val();
       if (!cardID) return;
-
       setLastScannedCard(cardID);
     });
   }, []);
@@ -64,54 +67,122 @@ function App() {
     setCurrentRoute("dashboard");
   };
 
+  // FIXED: Admin logout now sets a flag
+  const handleAdminLogout = () => {
+    setCurrentRoute("dashboard"); // go back to home
+    setAdminLoggedOut(true); // prevent auto-login
+  };
+
+  const renderDashboardContent = () => {
+    // <span style="color:white">Only show content if user is logged in AND has a role</span>
+    if (userRole === "customer") {
+      return (
+        <>
+          <UltrasonicTracker equipmentId="SQT01" initialStatus="FREE" />
+          <CurrentSensorTracker equipmentId="TRD01" initialStatus="FREE" />
+          <LoadCellTracker equipmentId="DMR05" />
+          <RFIDCapacity />
+        </>
+      );
+    }
+
+    if (userRole === "staff") {
+      return (
+        <>
+          <RFIDCapacity />
+          <RFIDEquipment />
+          <div className="staff-controls">
+            <button
+              onClick={() => setOpenRFIDModal(true)}
+              style={{
+                padding: "10px",
+                width: "100%",
+                background: "#4e8cff",
+                color: "white",
+                borderRadius: "6px",
+                border: "none",
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+            >
+              Open RFID Connect
+            </button>
+          </div>
+        </>
+      );
+    }
+
+    // <span style="color:white">Default view when not logged in (or role not loaded)</span>
+    return (
+      <div className="welcome-panel">
+        <h2>Welcome to GymTrack Dashboard</h2>
+        <p>Please log in to view your personalized tracking data.</p>
+      </div>
+    );
+  };
+
+  // <span style="color:white">Logic remains the same for display purposes</span>
+  const isLoggedInUser = user && currentRoute !== "admin-dashboard";
+  const isLoggedInAdmin = currentRoute === "admin-dashboard";
+
   return (
     <div className="App">
       <header className="App-header-title">
-        <h1>GymTrack Dashboard 📊</h1>
-
-        {user && <p>Logged in as: {user.displayName || user.email}</p>}
-
-        {!user && <LoginButton onClick={() => setIsModalOpen(true)} />}
-        {user && <button onClick={handleLogout}>Logout</button>}
-      </header>
-
-      {user && (
-        <div className="dashboard-grid">
-          {userRole === "staff" && (
-            <>
-              <RFIDEquipment />
-
-              {/* 🔵 BUTTON TO OPEN MODAL */}
-              <button
-                onClick={() => setOpenRFIDModal(true)}
-                style={{
-                  padding: "10px",
-                  marginBottom: "15px",
-                  background: "#4e8cff",
-                  color: "white",
-                  borderRadius: "6px",
-                  border: "none",
-                  cursor: "pointer",
-                }}
-              >
-                Open RFID Connect
-              </button>
-            </>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <h1>GymTrack Dashboard || </h1>
+          {isLoggedInUser && (
+            <p style={{ marginLeft: 20, color: "orange", fontWeight: "bold" }}>
+              Logged in as:{" "}
+              <span style={{ color: "white" }}>
+                {user.displayName || user.email}
+              </span>
+            </p>
           )}
-
-          <RFIDCapacity />
-
-          {userRole === "customer" && (
-            <>
-              <UltrasonicTracker equipmentId="SQT01" initialStatus="FREE" />
-              <CurrentSensorTracker equipmentId="TRD01" initialStatus="FREE" />
-              <LoadCellTracker equipmentId="DMR05" />
-            </>
+          {isLoggedInAdmin && (
+            <p style={{ marginLeft: 20, color: "orange", fontWeight: "bold" }}>
+              Logged in as: <span style={{ color: "white" }}>Admin</span>
+            </p>
           )}
         </div>
+
+        <div className="header-actions">
+          {!user && currentRoute !== "admin-dashboard" && (
+            <LoginButton onClick={() => setIsModalOpen(true)} />
+          )}
+          {isLoggedInUser && (
+            <button
+              onClick={handleLogout}
+              style={{
+                padding: "8px 15px",
+                background: "#f85149",
+                color: "white",
+                borderRadius: 4,
+                border: "none",
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+            >
+              Logout
+            </button>
+          )}
+        </div>
+      </header>
+
+      {currentRoute === "dashboard" && (
+        <div className="dashboard-grid">{renderDashboardContent()}</div>
       )}
 
-      {/* MODAL ONLY OPENS WHEN BUTTON IS CLICKED */}
+      {currentRoute === "admin-entry" && !adminLoggedOut && (
+        <AdminEntry
+          onLogin={() => setCurrentRoute("admin-dashboard")}
+          onBack={() => setCurrentRoute("dashboard")}
+        />
+      )}
+
+      {currentRoute === "admin-dashboard" && (
+        <AdminDashboard onLogout={handleAdminLogout} />
+      )}
+
       {userRole === "staff" && openRFIDModal && (
         <AddRFIDModal
           cardID={lastScannedCard}

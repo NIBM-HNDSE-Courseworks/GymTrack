@@ -30,7 +30,7 @@ function LoadCellTracker({ equipmentId }) {
         <p>Weight Reading: **{weight} kg** </p>
         <div
           className="status-indicator"
-          style={{ color: status === "PRESENT" ? "blue" : "orange" }}
+          style={{ color: status === "PRESENT" ? "green" : "orange" }}
         >
           Item Status: **{status}**
         </div>

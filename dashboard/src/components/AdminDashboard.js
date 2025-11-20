@@ -4,6 +4,7 @@ import AddStaffModal from "./AddStaffModal";
 import "./AdminDashboard.css";
 import { getStaffList, deleteStaff } from "../Firebase";
 
+// The AdminDashboard component now receives the new onLogout prop
 function AdminDashboard({ onLogout }) {
   const [staff, setStaff] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -87,7 +88,20 @@ function AdminDashboard({ onLogout }) {
     <div className="staff-dashboard-container">
       <div className="dashboard-header">
         <h1 className="dashboard-title">Staff Management</h1>
-        <button onClick={onLogout} className="logout-button">
+
+        {/* LOGOUT BUTTON: Now styled inline for consistency and theme compliance */}
+        <button
+          onClick={onLogout}
+          style={{
+            padding: "8px 15px",
+            background: "#f85149", // 🔴 Red background (Logout color)
+            color: "white", // White text
+            borderRadius: "4px",
+            border: "none",
+            cursor: "pointer",
+            fontWeight: "bold",
+          }}
+        >
           Logout
         </button>
       </div>

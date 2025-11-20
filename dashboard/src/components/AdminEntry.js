@@ -1,14 +1,12 @@
 // src/components/AdminEntry.js
 import React, { useState } from "react";
-import "./AuthModal.css"; // Reusing modal styles for simplicity
+import "./AuthModal.css";
 
-// NOTE: In a real app, you would use a secure server check here.
-
-function AdminEntry({ onLoginSuccess, onClose }) {
+// 1. Rename 'onLoginSuccess' to 'onLogin' in the function signature
+function AdminEntry({ onLogin, onClose }) {
   const [adminPassword, setAdminPassword] = useState("");
   const [error, setError] = useState("");
 
-  // ADMIN PASSWORD IS HARDCODED HERE
   const CORRECT_ADMIN_PASSWORD = "admin123";
 
   const handleSubmit = (e) => {
@@ -16,7 +14,8 @@ function AdminEntry({ onLoginSuccess, onClose }) {
     setError("");
     if (adminPassword === CORRECT_ADMIN_PASSWORD) {
       console.log("Admin password accepted.");
-      onLoginSuccess(); // Switch to the staff dashboard
+      // 2. Rename 'onLoginSuccess()' to 'onLogin()'
+      onLogin(); // Switch to the staff dashboard
     } else {
       setError("Invalid admin password.");
       setAdminPassword("");
