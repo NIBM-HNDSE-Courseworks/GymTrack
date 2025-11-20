@@ -53,17 +53,20 @@ function App() {
       const cardID = snap.val();
       if (!cardID) return;
 
+      // Check users/<cardID>/uid - if not present or empty => newCard (unassigned)
       const userRef = ref(db, `users/${cardID}`);
       const userSnap = await get(userRef);
 
-      // New user → show modal
-      if (!userSnap.exists() || !userSnap.val().registered) {
+      if (!userSnap.exists() || !userSnap.val().uid) {
+        // Unassigned card detected -> open User Connect modal and pass cardID
         return setNewCard(cardID);
       }
 
-      // Existing user → toggle inside
+      // Card assigned -> toggle inside (existing behaviour)
       const inside = userSnap.val().inside || 0;
       await set(ref(db, `users/${cardID}/inside`), inside === 0 ? 1 : 0);
+
+      // clear any modal/newCard state
       setNewCard(null);
     });
   }, []);
@@ -101,12 +104,12 @@ function App() {
         </div>
       )}
 
-      {/* NEW USER POPUP */}
+      {/* USER CONNECT (formerly AddRFIDModal) */}
       {userRole === "staff" && newCard && (
         <AddRFIDModal
           cardID={newCard}
           onClose={() => setNewCard(null)}
-          onAdd={() => setNewCard(null)}
+          onConnect={() => setNewCard(null)}
         />
       )}
 

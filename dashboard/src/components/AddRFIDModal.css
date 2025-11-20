@@ -1,0 +1,126 @@
+/* src/components/AddRFIDModal.css */
+
+/* Dim background */
+.modal-overlay {
+  position: fixed;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+}
+
+/* Modal box */
+.modal {
+  width: 920px;
+  max-width: 95%;
+  background: #161b22; /* Same as your dashboard table */
+  padding: 20px;
+  border-radius: 10px;
+  color: #c9d1d9; /* Main text */
+  border: 1px solid #30363d; /* Outline */
+  box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+}
+
+/* Two column layout */
+.lists-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.list-col { flex: 1; }
+
+/* List box */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 260px;
+  overflow: auto;
+  padding: 8px;
+  background: #0d1117; /* Same as dashboard bg */
+  border: 1px solid #30363d;
+  border-radius: 6px;
+}
+
+/* Inside list items */
+.list-item {
+  text-align: left;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #1a222d; /* Slightly lighter than list bg */
+  border: 1px solid #30363d;
+  transition: 0.15s;
+}
+
+.list-item:hover {
+  background: #222c3a;
+}
+
+.list-item.selected {
+  border-color: #4299e1; /* Your theme blue */
+  background: rgba(66,153,225,0.15);
+}
+
+/* Empty message */
+.list-empty {
+  color: #8b949e;
+  padding: 12px;
+}
+
+/* Button row */
+.connect-row {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+/* Base button */
+.btn {
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  border: none;
+}
+
+/* CONNECT button */
+.btn.connect {
+  background: #4299e1;
+  color: white;
+}
+.btn.connect:hover {
+  background: #2b82c6;
+}
+
+/* CANCEL button */
+.btn.cancel {
+  background: #30363d;
+  color: #c9d1d9;
+}
+.btn.cancel:hover {
+  background: #3a424b;
+}
+
+/* Card Assignment Section */
+.assigned-section {
+  margin-top: 18px;
+  border-top: 1px solid #30363d;
+  padding-top: 12px;
+}
+
+.assigned-section h3 {
+  color: #4299e1;
+  margin-bottom: 10px;
+}
+
+.assignment-row {
+  padding: 10px;
+  background: #1a222d;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
