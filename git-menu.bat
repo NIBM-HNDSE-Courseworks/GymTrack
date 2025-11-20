@@ -43,8 +43,10 @@ exit /b
 :doPush
 echo Staging all files except git-menu.bat and node_modules...
 
-:: Stage everything except this script and the dashboard's node_modules folder
-git add . ":!git-menu.bat" ":!dashboard/node_modules"
+:: Stage all files, then unstage the ones we want to skip
+git add .
+git reset git-menu.bat
+git reset -q dashboard/node_modules
 
 echo Enter commit message:
 set /p msg=
