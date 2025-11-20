@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 :: === SET YOUR PROJECT FOLDER HERE ===
-set "PROJECT=C:\Project"
+set "PROJECT=C:\Users\Gajindu\Desktop\Gajindu\HND\IOT\CW\Gymtrack - Copy"
 set "REPO=https://github.com/NIBM-HNDSE-Courseworks/GymTrack.git"
 
 cd "%PROJECT%"
