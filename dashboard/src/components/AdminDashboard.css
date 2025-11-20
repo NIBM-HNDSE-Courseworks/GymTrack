@@ -1,0 +1,123 @@
+/* src/components/AdminDashboard.css */
+
+.staff-dashboard-container {
+    padding: 20px;
+    background-color: #0d1117;
+    color: #c9d1d9;
+    min-height: 100vh;
+}
+
+/* Header */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #30363d;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.dashboard-title {
+    color: #4299e1;
+    font-size: 2.5em;
+    margin: 0;
+}
+
+.logout-button {
+    padding: 10px 20px;
+    background-color: #e53e3e;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.logout-button:hover {
+    background-color: #c53030;
+}
+
+/* Staff Section */
+.staff-list-section h2 {
+    color: #e2e8f0;
+    margin: 0;
+    margin-bottom: 15px;
+    display: inline-block;
+}
+
+.add-staff-trigger {
+    padding: 8px 15px;
+    background-color: #48bb78;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 600;
+    margin-left: 20px;
+    transition: 0.2s;
+}
+
+.add-staff-trigger:hover {
+    background-color: #38a169;
+}
+
+/* Table */
+.staff-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #161b22;
+    border-radius: 8px;
+    margin-top: 20px;
+    border: 1px solid #30363d; /* NEW: outer border */
+}
+
+.staff-table thead tr {
+    background-color: #1f2a38;
+    border-bottom: 2px solid #30363d; /* NEW: clear header line */
+}
+
+.staff-table th {
+    padding: 12px 15px;
+    text-align: left;
+    color: #4299e1;
+    font-weight: 700;
+    border-right: 1px solid #30363d; /* NEW: vertical column lines */
+}
+
+.staff-table td {
+    padding: 10px 15px;
+    border-bottom: 1px solid #30363d;
+    border-right: 1px solid #30363d; /* NEW */
+}
+
+/* Remove last column right border */
+.staff-table th:last-child,
+.staff-table td:last-child {
+    border-right: none;
+}
+
+/* Buttons */
+.delete-btn {
+    padding: 6px 12px;
+    background-color: #e53e3e;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: 0.2s;
+}
+
+.delete-btn:hover {
+    background-color: #c53030;
+}
+
+
+/* Loading / Error */
+.loading-message,
+.error-message {
+    margin-top: 15px;
+    font-size: 1.1em;
+}

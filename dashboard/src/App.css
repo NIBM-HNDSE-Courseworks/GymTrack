@@ -1,9 +1,53 @@
-/*
-  Minimal CSS. All primary styling is handled by Tailwind classes within App.js.
-*/
-.App {
-  /* Ensuring the React app fills its container */
-  min-height: 100vh;
+/* src/App.css - Main Layout & Global Dark Theme */
+
+/* 1. Full Screen and Dark Background */
+body, #root, .App {
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
 }
-/* You can remove all the previous styles related to App-logo-spin, App-header, etc.,
-   as they are now implemented using modern JSX/Tailwind practices. */
+
+.App {
+    text-align: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* Main Dark Mode Background: Very dark, almost black */
+    background-color: #0d1117; 
+    color: #c9d1d9; /* Light gray text for high contrast */
+}
+
+/* 2. Header Style */
+.App-header-title {
+    background-color: #161b22; 
+    padding: 20px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8); 
+}
+
+.header-content {
+    text-align: left;
+}
+
+/* REMOVED .login-button STYLES - now in LoginButton.css */
+
+
+/* 3. Dashboard Grid Layout (Stacked) */
+.dashboard-grid {
+    display: flex;
+    flex-direction: column; 
+    align-items: center; 
+    gap: 30px;
+    padding: 30px 20px 60px 20px;
+}
+
+/* 4. Footer */
+.footer-note {
+    padding: 20px;
+    border-top: 1px solid #30363d; 
+    background-color: #161b22;
+    margin-top: auto; 
+    font-size: 0.9em;
+    color: #8b949e;
+}

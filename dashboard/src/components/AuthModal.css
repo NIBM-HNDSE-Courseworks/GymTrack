@@ -1,0 +1,190 @@
+/* src/components/AuthModal.css */
+
+/* Modal Backdrop */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    /* Added transition for backdrop fade-out */
+    transition: background 0.3s ease-out; 
+}
+
+/* Backdrop Fade Out */
+.modal-overlay.closing {
+    background: rgba(0, 0, 0, 0); /* Fade to transparent */
+}
+
+/* Modal Card */
+.auth-card {
+    background-color: #1f2a38;
+    color: #e2e8f0;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+    border: 1px solid #36404a;
+    /* Slide-In Animation */
+    animation: slideIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; 
+}
+
+/* Slide-In Keyframes */
+@keyframes slideIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(50px) scale(0.95);
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* NEW: Slide-Out Animation Keyframes */
+@keyframes slideOut {
+    from { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+    }
+    to { 
+        opacity: 0; 
+        transform: translateY(50px) scale(0.95); /* Slides down and fades out */
+    }
+}
+
+/* Apply Slide-Out Animation when the 'closing' class is present */
+.auth-card.closing {
+    animation: slideOut 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards; 
+}
+
+
+.auth-card h2 {
+    color: #4299e1;
+    margin-top: 0;
+    margin-bottom: 25px;
+    text-align: center;
+    font-size: 2em;
+    font-weight: 700;
+}
+
+/* Informational notes, like the one for Signup */
+.auth-form .note {
+    font-size: 0.85em;
+    color: #a0aec0;
+    text-align: center;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #36404a;
+}
+
+.close-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #a0aec0;
+    font-size: 1.5em;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.close-button:hover {
+    color: #4299e1;
+}
+
+/* --- Form Styles --- */
+
+.auth-form label {
+    display: block;
+    text-align: left; 
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #e2e8f0;
+    font-size: 0.95em;
+}
+
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="password"] {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 20px;
+    border: 1px solid #4a5568;
+    border-radius: 6px;
+    background-color: #2d3748;
+    color: #e2e8f0;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.auth-form input:focus {
+    border-color: #4299e1;
+    outline: none;
+    box-shadow: 0 0 8px rgba(66, 153, 225, 0.7);
+}
+.auth-form input::placeholder {
+    color: #718096;
+}
+
+.submit-button {
+    width: 100%;
+    padding: 14px;
+    background-color: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.05em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+.submit-button:hover {
+    background-color: #3182ce;
+    transform: translateY(-1px);
+}
+.submit-button:active {
+    transform: translateY(0);
+}
+
+/* Link to switch to Sign Up/Log In */
+.switch-auth-mode {
+    margin-top: 25px;
+    text-align: center;
+    font-size: 0.95em;
+    color: #a0aec0;
+}
+
+.switch-auth-mode button {
+    background: none;
+    border: none;
+    color: #4299e1;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: 5px;
+    transition: color 0.2s, text-decoration 0.2s;
+}
+
+.switch-auth-mode button:hover {
+    text-decoration: underline;
+    color: #63b3ed;
+}
+
+/* Error Message Style */
+.error-message {
+    color: #fc8181;
+    background-color: #443333;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 500;
+    border: 1px solid #e53e3e;
+}
