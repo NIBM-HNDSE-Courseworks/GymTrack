@@ -2,8 +2,8 @@
 #include <MFRC522.h>
 
 // Define the pins connected to the RC522
-#define RST_PIN   D2  // Connects to RC522 RST (GPIO0)
-#define SS_PIN    D1  // Connects to RC522 SDA/SS (GPIO15)
+#define RST_PIN   D4  // Connects to RC522 RST (GPIO0)
+#define SS_PIN    D2  // Connects to RC522 SDA/SS (GPIO15)
 
 MFRC522 mfrc522(SS_PIN, RST_PIN); // Create MFRC522 instance
 
