@@ -1,4 +1,3 @@
-// src/components/AddRFIDModal.js
 import React, { useEffect, useState, useRef } from "react";
 import "./AddRFIDModal.css";
 import { db } from "../Firebase";
@@ -117,6 +116,27 @@ function AddRFIDModal({ cardID, onClose, onConnect }) {
     }
   };
 
+  // *** NEW FUNCTION FOR DELETE/UNASSIGNMENT ***
+  const handleUnassign = async (cardID) => {
+    if (!window.confirm(`Are you sure you want to unassign card ${cardID}?`)) {
+      return;
+    }
+
+    try {
+      // 1. Set uid to "" (empty string)
+      await set(ref(db, `users/${cardID}/uid`), "");
+      // 2. Set 'inside' column to 0
+      await set(ref(db, `users/${cardID}/inside`), 0);
+
+      await loadLists();
+      alert(`Card ${cardID} successfully unassigned.`);
+    } catch (err) {
+      console.error("Unassign error:", err);
+      alert("Failed to unassign card. See console.");
+    }
+  };
+  // *** END NEW FUNCTION ***
+
   return (
     <div className="modal-overlay">
       <div className="modal add-rfid-modal">
@@ -193,14 +213,28 @@ function AddRFIDModal({ cardID, onClose, onConnect }) {
 
         <div className="assigned-section">
           <h3>Assigned Cards</h3>
-          {assignedList.length === 0 && <div>No assigned cards yet</div>}
-          <ul>
+          <div className="list">
+            {assignedList.length === 0 && (
+              <div className="list-empty">No assigned cards yet</div>
+            )}
             {assignedList.map((a) => (
-              <li key={a.cardID}>
-                <strong>{a.cardID}</strong> → {a.customerName} ({a.customerId})
-              </li>
+              // *** UPDATED RENDERING FOR ASSIGNED CARDS ***
+              <div key={a.cardID} className="list-item assigned-item">
+                <div className="assigned-info">
+                  <strong>Card: {a.cardID}</strong>
+                  <br />
+                  Customer: {a.customerName} ({a.customerId})
+                </div>
+                <button
+                  className="btn delete-btn"
+                  onClick={() => handleUnassign(a.cardID)}
+                >
+                  &#x2715; Delete
+                </button>
+              </div>
+              // *** END UPDATED RENDERING ***
             ))}
-          </ul>
+          </div>
         </div>
       </div>
     </div>
