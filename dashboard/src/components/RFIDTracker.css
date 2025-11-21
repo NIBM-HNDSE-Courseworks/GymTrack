@@ -1,24 +1,22 @@
 /* src/components/RFIDTracker.css (Combined) */
 
 /* -------------------------------------- */
-/* ## Base Tracker Card Styles 📊        */
+/* ## Base Tracker Card Styles 📊         */
 /* -------------------------------------- */
 .tracker-card {
-  /* Main card container style */
-  background-color: #161b22; /* Slightly darker than main background */
+  background-color: #111827;
   border: 1px solid #30363d;
   border-radius: 10px;
   padding: 25px;
-  width: 100%; /* Take full width of its grid cell */
+  width: 100%;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   text-align: center;
-  /* Allow card height to stretch if necessary, important for grid alignment */
   display: flex;
   flex-direction: column;
 }
 
 .tracker-card h2 {
-  color: #58a6ff; /* Blue color for heading (Will be overwritten by .capacity-card h2) */
+  color: #58a6ff;
   margin-top: 0;
   margin-bottom: 20px;
 }
@@ -26,7 +24,7 @@
 .status-indicator {
   padding: 15px;
   border-radius: 8px;
-  color: white; /* Default text color */
+  color: white;
   font-size: 1.2em;
   font-weight: bold;
   margin-bottom: 20px;
@@ -34,13 +32,12 @@
 }
 
 /* -------------------------------------- */
-/* ## Minimalist Button Styling 🔘       */
-/* (Used by other tracker cards)          */
+/* ## Minimalist Button Styling 🔘        */
 /* -------------------------------------- */
 .tracker-card button {
-  background-color: #161b22; /* Dark background */
-  color: #58a6ff; /* Blue text */
-  border: 1px solid #58a6ff; /* Blue border accent */
+  background-color: #111827;
+  color: #58a6ff;
+  border: 1px solid #58a6ff;
   padding: 10px 15px;
   margin: 5px;
   border-radius: 6px;
@@ -50,47 +47,107 @@
 }
 
 .tracker-card button:hover {
-  background-color: #58a6ff; /* Hover makes it solid blue */
-  color: #0d1117; /* Dark text on hover */
+  background-color: #58a6ff;
+  color: #0d1117;
 }
-
 
 /* -------------------------------------- */
 /* ## Capacity Card Specific Overrides 🏋️ */
 /* -------------------------------------- */
-
 .capacity-card {
-  /* Overrides tracker-card background for a slightly distinct look */
-  background-color: #161b22; 
-  /* Inherits display: flex, border, radius, shadow, etc., from .tracker-card */
+  background-color: #111827;
   align-items: center;
-  padding: 25px; /* Use standard padding */
+  padding: 25px;
+  margin-bottom: 20px;
 }
 
 .capacity-card h2 {
-  /* Overrides base h2 color for better contrast/emphasis in the capacity card */
   color: white;
   margin-bottom: 20px;
-  border-bottom: 2px solid #4e8cff; /* Blue underline */
+  border-bottom: 2px solid #4e8cff;
   padding-bottom: 5px;
 }
 
 .capacity-indicator {
-  /* Overrides base .status-indicator padding/size */
   width: 100%;
   padding: 10px 0;
   margin-bottom: 20px;
   border-radius: 5px;
   text-align: center;
   transition: background-color 0.5s ease;
-  /* Ensure text is white or very dark for contrast on dynamic color */
-  color: white; /* Keeping white text for dynamic background colors */
-  font-size: 1.5em; /* Increase font size */
+  color: white;
+  font-size: 1.5em;
 }
 
 .capacity-display {
-  /* Center and format the number display */
   text-align: center;
   padding: 10px 0;
   width: 100%;
+}
+
+/* -------------------------------------- */
+/* NEW: Customer Status List Styling ⭐    */
+/* -------------------------------------- */
+.customer-status-card {
+  align-items: flex-start;
+  text-align: left;
+  min-height: 150px;
+}
+
+.customer-status-card h2 {
+  border-bottom: 2px solid #ff9900;
+  color: orange;
+}
+
+.customer-grid {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 20px;
+}
+
+.customer-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.customer-item {
+  display: flex;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px dotted #30363d;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 10px;
+  border: 2px solid #111827;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+/* Pulse Animations */
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(92, 184, 92, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(92, 184, 92, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(92, 184, 92, 0); }
+}
+
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 0 0 rgba(217, 83, 79, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(217, 83, 79, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(217, 83, 79, 0); }
+}
+
+.dot-green {
+  background-color: #5cb85c;
+  animation: pulse-green 2s infinite;
+}
+
+.dot-red {
+  background-color: #d9534f;
+  animation: pulse-red 2s infinite;
 }
