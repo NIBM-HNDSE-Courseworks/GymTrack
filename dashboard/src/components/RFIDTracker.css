@@ -88,11 +88,14 @@
 /* -------------------------------------- */
 /* NEW: Customer Status List Styling ⭐    */
 /* -------------------------------------- */
+/* Add spacing for chart inside customer-status-card */
 .customer-status-card {
   align-items: flex-start;
   text-align: left;
   min-height: 150px;
+  padding-bottom: 30px;
 }
+
 
 .customer-status-card h2 {
   border-bottom: 2px solid #ff9900;

@@ -1,11 +1,12 @@
 // -----------------------------------------------------
-// RFID_UserTracking.ino   (CLEAN + CORRECT LOGIC)
+// RFID_UserTracking.ino   (REAL TIMESTAMP VERSION)
 // -----------------------------------------------------
 
 #include <ESP8266WiFi.h>
 #include <FirebaseESP8266.h>
 #include <SPI.h>
 #include <MFRC522.h>
+#include <time.h>
 
 // --- WiFi ---
 #define WIFI_SSID "Dialog 4G 375"
@@ -20,10 +21,42 @@
 #define SS_PIN D1
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 
-// --- Firebase ---
+// Firebase
 FirebaseData firebaseData;
 FirebaseAuth auth;
 FirebaseConfig config;
+
+// -----------------------------------------------------
+// NTP TIME SETTINGS (GMT+5:30 for Sri Lanka)
+// -----------------------------------------------------
+const long gmtOffset_sec = 5 * 3600 + 1800; // 5.5h → 19800 seconds
+const int daylightOffset_sec = 0;           // No DST in Sri Lanka
+const char* ntpServer = "pool.ntp.org";
+
+// -----------------------------------------------------
+// GET REAL TIME AS STRING
+// -----------------------------------------------------
+String getTimestamp() {
+  time_t now;
+  struct tm timeinfo;
+
+  time(&now);
+  localtime_r(&now, &timeinfo);
+
+  char buffer[30];
+  snprintf(buffer, sizeof(buffer),
+           "%04d-%02d-%02dT%02d:%02d:%02d",
+           timeinfo.tm_year + 1900,
+           timeinfo.tm_mon + 1,
+           timeinfo.tm_mday,
+           timeinfo.tm_hour,
+           timeinfo.tm_min,
+           timeinfo.tm_sec);
+
+  return String(buffer);
+}
+
+// -----------------------------------------------------
 
 void connectWiFi() {
   Serial.print("Connecting WiFi");
@@ -35,6 +68,7 @@ void connectWiFi() {
   Serial.println("\nWiFi Connected ✅");
 }
 
+// Build RFID Card ID String
 String buildCardID() {
   String cardID = "";
   for (byte i = 0; i < mfrc522.uid.size; i++) {
@@ -45,6 +79,7 @@ String buildCardID() {
   return cardID;
 }
 
+// Firebase Helpers
 String fbGetString(String path) {
   if (Firebase.getString(firebaseData, path)) return firebaseData.stringData();
   return "";
@@ -55,6 +90,8 @@ int fbGetInt(String path, int fallback = 0) {
   return fallback;
 }
 
+// -----------------------------------------------------
+
 void setup() {
   Serial.begin(115200);
   SPI.begin();
@@ -62,6 +99,20 @@ void setup() {
 
   Serial.println("Starting RFID Reader...");
   connectWiFi();
+
+  // --- NTP TIME CONFIG ---
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+
+  Serial.println("Getting time...");
+  delay(2000);
+
+  time_t now = time(nullptr);
+  while (now < 100000) {  // Wait until NTP syncs
+    Serial.print(".");
+    delay(500);
+    now = time(nullptr);
+  }
+  Serial.println("\nTime Synced ⏱");
 
   config.database_url = FIREBASE_HOST;
   config.signer.tokens.legacy_token = FIREBASE_AUTH;
@@ -77,10 +128,12 @@ void loop() {
   }
 
   String cardID = buildCardID();
+  String timestamp = getTimestamp();
+
   Serial.println("\n🔍 RFID Scan -------------------------");
   Serial.println("Card: " + cardID);
+  Serial.println("Time: " + timestamp);
 
-  // Update frontend
   Firebase.setString(firebaseData, "/last_scanned_card", cardID);
 
   String uidPath = "/users/" + cardID + "/uid";
@@ -88,19 +141,27 @@ void loop() {
   String userRoot = "/users/" + cardID;
 
   // -----------------------------------------------------
-  // UNASSIGNED CARD → only save inside = 0 (no toggle)
+  // UNASSIGNED CARD
   // -----------------------------------------------------
   if (linkedUID == "") {
     Serial.println("Status: ❌ UNASSIGNED → No Entry Allowed");
 
     Firebase.setInt(firebaseData, userRoot + "/inside", 0);
-
     Serial.println("Action: inside = 0 (DENIED)");
+
+    FirebaseJson logEntry;
+    logEntry.set("rfid", cardID);
+    logEntry.set("customerUID", "");
+    logEntry.set("customerName", "Unknown");
+    logEntry.set("action", "denied");
+    logEntry.set("timestamp", timestamp);
+
+    Firebase.pushJSON(firebaseData, "/users_in_out_log", logEntry);
     return;
   }
 
   // -----------------------------------------------------
-  // ASSIGNED CARD → toggle entry/exit
+  // ASSIGNED USER
   // -----------------------------------------------------
   Serial.println("Status: ✅ ASSIGNED USER");
 
@@ -109,6 +170,19 @@ void loop() {
 
   Firebase.setInt(firebaseData, userRoot + "/inside", newInside);
 
+  String action = newInside == 1 ? "in" : "out";
+
   Serial.print("Action: ");
-  Serial.println(newInside == 1 ? "ENTER 🔼" : "EXIT 🔽");
+  Serial.println(action == "in" ? "ENTER 🔼" : "EXIT 🔽");
+
+  String customerName = fbGetString("/customers/" + linkedUID + "/name");
+
+  FirebaseJson logEntry;
+  logEntry.set("rfid", cardID);
+  logEntry.set("customerUID", linkedUID);
+  logEntry.set("customerName", customerName);
+  logEntry.set("action", action);
+  logEntry.set("timestamp", timestamp);
+
+  Firebase.pushJSON(firebaseData, "/users_in_out_log", logEntry);
 }
