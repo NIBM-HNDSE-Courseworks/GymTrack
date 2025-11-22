@@ -7,16 +7,16 @@
 #include "HX711.h"
 
 // --- WiFi ---
-#define WIFI_SSID "Galaxy A04s 093A"
-#define WIFI_PASSWORD "12345678"
+#define WIFI_SSID "Hirantha's Galaxy M31"
+#define WIFI_PASSWORD "Hira@2413"
 
 // --- Firebase ---
 #define FIREBASE_HOST "smartgymtracker-4123b-default-rtdb.firebaseio.com"
 #define FIREBASE_AUTH "RCq1FclKIALVguVHCAnNLwmCAvPH9i28PMiGgS1Z"
 
 // --- Load Cell Pins ---
-#define DT_PIN D2
-#define SCK_PIN D3
+#define DT_PIN D3
+#define SCK_PIN D4
 
 HX711 scale;
 
@@ -111,7 +111,7 @@ void loop() {
   Serial.println("--------------------------");
   Serial.println("Weight: " + String(weight, 2) + " g");
 
-  // *** ORIGINAL LOGIC RESTORED ***
+  // *** ORIGINAL LOGIC RESTORED ***a
   // Status is "AVAILABLE" if weight is 500g or more.
   // Status is "UNAVAILABLE" if weight is less than 500g.
   String status = (weight >= 500.0) ? "AVAILABLE" : "UNAVAILABLE";
