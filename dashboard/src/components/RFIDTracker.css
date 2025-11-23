@@ -88,14 +88,12 @@
 /* -------------------------------------- */
 /* NEW: Customer Status List Styling ⭐    */
 /* -------------------------------------- */
-/* Add spacing for chart inside customer-status-card */
 .customer-status-card {
   align-items: flex-start;
   text-align: left;
   min-height: 150px;
   padding-bottom: 30px;
 }
-
 
 .customer-status-card h2 {
   border-bottom: 2px solid #ff9900;
@@ -123,13 +121,17 @@
   border-bottom: 1px dotted #30363d;
 }
 
+/* -------------------------------------- */
+/* Status Dot (Merged Definitions)        */
+/* -------------------------------------- */
 .status-dot {
-  width: 12px;
-  height: 12px;
+  width: 14px;      /* merged: 12px + 14px → keep larger */
+  height: 14px;
   border-radius: 50%;
-  margin-right: 10px;
   border: 2px solid #111827;
+  margin-right: 10px;
   box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+  position: relative; /* prevents conflict with equip-card absolute */
 }
 
 /* Pulse Animations */
@@ -145,6 +147,19 @@
   100% { box-shadow: 0 0 0 0 rgba(217, 83, 79, 0); }
 }
 
+@keyframes pulse-purple {
+  0% { box-shadow: 0 0 0 0 rgba(255,107,214,0.6); }
+  70% { box-shadow: 0 0 0 10px rgba(255,107,214,0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,107,214,0); }
+}
+
+@keyframes pulse-yellow {
+  0% { box-shadow: 0 0 0 0 rgba(255,221,87,0.6); }
+  70% { box-shadow: 0 0 0 10px rgba(255,221,87,0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,221,87,0); }
+}
+
+/* Dot color classes */
 .dot-green {
   background-color: #5cb85c;
   animation: pulse-green 2s infinite;
@@ -153,4 +168,53 @@
 .dot-red {
   background-color: #d9534f;
   animation: pulse-red 2s infinite;
+}
+
+.dot-purple {
+  background-color: #a855f7;
+  animation: pulse-purple 2s infinite;
+}
+
+.dot-yellow {
+  background-color: #eab308;
+  animation: pulse-yellow 2s infinite;
+}
+
+/* -------------------------------------- */
+/* Equipment Card Styles 🏷️              */
+/* -------------------------------------- */
+.equip-card {
+  background: #1a1f29;
+  border: 1px solid #30363d;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  position: relative;
+}
+
+.equip-title {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #58a6ff;
+  margin-bottom: 8px;
+}
+
+.equip-location span {
+  color: #facc15;
+  font-weight: 600;
+}
+
+.equip-rfid {
+  color: #9ca3af;
+  margin-top: 5px;
+}
+
+/* Status dot positioned for equipment cards only */
+.equip-card .status-dot {
+  position: absolute;
+  right: 10px;
+  top: 10px;
 }

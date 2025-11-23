@@ -1,55 +1,63 @@
-/* --- Card/Group Styling (Shared across all trackers) --- */
-.tracker-group {
-  /* Aligned with minimalist dark theme components */
-  border: 1px solid #30363d;
-  background-color: #161b22;
-  border-radius: 10px;
-  padding: 20px;
-  /* Removed max-width/width to allow it to fully integrate into the dashboard-grid */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
-  width: 100%; /* Ensure it fills the grid cell */
+/* src/components/LoadCellTracker.css (Additions to existing styles) */
+
+/* --- Simplified Load Cell Card Layout --- */
+.simplified-loadcell {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.group-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 2px solid #30363d;
-  padding-bottom: 10px;
-  margin-bottom: 15px;
+.loadcell-reading-box {
+    text-align: center;
+    padding: 10px 0;
+    border-bottom: 1px dotted #30363d;
+}
+
+.reading-label {
+    color: #8b949e; /* Muted gray for the label */
+    font-size: 1em;
+    margin-bottom: 5px;
+}
+
+.reading-value {
+    color: white; 
+    font-size: 2.2em; /* Prominent display for the weight */
+    font-weight: 700;
+}
+
+.simplified-status {
+    /* Ensures the status indicator remains bold and clear */
+    padding: 12px;
+}
+
+/* Ensure existing base styles are also present: */
+.tracker-group {
+    border: 1px solid #30363d;
+    background-color: #161b22;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+    width: 100%;
+    margin: 10px 0;
 }
 
 .group-header h2 {
-  /* MODIFIED: Use the blue accent for primary titles */
-  font-size: 1.4em;
-  color: #58a6ff;
-  margin: 0;
+    font-size: 1.4em;
+    color: #58a6ff;
+    margin: 0;
 }
 
 .tracker-card {
-  padding: 10px 0;
-  text-align: left;
-  color: #c9d1d9; /* Standard light text color */
-}
-
-.tracker-card h3 {
-  /* MODIFIED: Use standard light text color */
-  color: #c9d1d9;
+    padding: 10px 0;
+    text-align: left;
+    color: #c9d1d9;
 }
 
 .status-indicator {
-  padding: 12px;
-  border-radius: 4px;
-  text-align: center;
-  margin: 10px 0;
-  font-size: 1.2em;
-  /* MODIFIED: Status indicators must use the high-contrast, very dark text color against the dynamic background (red/green/orange) */
-  color: #0d1117;
-  font-weight: bold;
-}
-
-.logic-note {
-  font-size: 0.85em;
-  color: #8b949e; /* Muted gray for secondary information */
-  margin-top: 15px;
+    padding: 12px;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 1.2em;
+    color: #0d1117; 
+    font-weight: bold;
 }

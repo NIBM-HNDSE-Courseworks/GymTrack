@@ -42,7 +42,7 @@ function UltrasonicTracker({ equipmentId, initialStatus }) {
   return (
     <div className="tracker-group tracker-card">
       <div className="group-header">
-        <h2>🏋️ High-Traffic Areas (Squat Rack, etc.)</h2>
+        <h2>🏋 High-Traffic Areas (Squat Rack, etc.)</h2>
         <AddEquipmentButton equipmentType="Ultrasonic" />
       </div>
       <div className="tracker-card-content">
@@ -52,9 +52,9 @@ function UltrasonicTracker({ equipmentId, initialStatus }) {
           className="status-indicator"
           style={{ backgroundColor: statusColor }} // Use inline style based on statusColor variable
         >
-          Current State: **{state}**
+          Current State: *{state}*
         </div>
-        <p>Distance Reading: **{distance} cm** </p>
+        <p>Distance Reading: *{distance} cm* </p>
         <p className="logic-note">
           Logic: FREE → IN USE: Presence = True for 10 sec
         </p>
