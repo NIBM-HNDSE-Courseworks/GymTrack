@@ -92,7 +92,7 @@ function CurrentSensorTracker() {
             className="status-indicator current-status"
             style={{ backgroundColor: statusIndicatorColor }}
           >
-            Machine Status: *{statusDisplay}*
+            Status: *{statusDisplay}*
           </div>
           
           {/* Note on Threshold */}

@@ -21,7 +21,7 @@
 // Adjust this threshold based on testing. 
 // A value above this will indicate the motor is drawing current (i.e., in use).
 // Typical idle noise on A0 might be around 0-50. A motor running will be much higher.
-const int USAGE_THRESHOLD = 80; // Analog value (0-1023). **Tune this!**
+const int USAGE_THRESHOLD = 10; // Analog value (0-1023). **Tune this!**
 
 // Firebase objects
 FirebaseData firebaseData;
