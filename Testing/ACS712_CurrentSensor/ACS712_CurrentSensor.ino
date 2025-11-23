@@ -116,5 +116,5 @@ void loop() {
   
   updateFirebase(rawReading, status);
 
-  delay(1000); // update every 1 sec
+  delay(300); // update every 1 sec
 }
