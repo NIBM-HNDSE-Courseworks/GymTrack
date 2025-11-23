@@ -8,6 +8,7 @@ import LoadCellTracker from "./components/LoadCellTracker";
 import RFIDEquipment from "./components/RFIDEquipment";
 import RFIDCapacity from "./components/RFIDCapacity";
 import AddRFIDModal from "./components/AddRFIDModal";
+import AddRFIDEquipmentModal from "./components/AddRFIDEquipmentModal";   // ⭐ NEW IMPORT
 
 import LoginButton from "./components/LoginButton";
 import AuthModal from "./components/AuthModal";
@@ -25,6 +26,7 @@ function App() {
   const [userRole, setUserRole] = useState(null);
 
   const [openRFIDModal, setOpenRFIDModal] = useState(false);
+  const [openRFIDEquipmentModal, setOpenRFIDEquipmentModal] = useState(false); // ⭐ NEW STATE
   const [lastScannedCard, setLastScannedCard] = useState(null);
 
   // NEW: Prevent auto-login loop for admin
@@ -107,6 +109,24 @@ function App() {
             >
               Open RFID Connect
             </button>
+
+            {/* ⭐ NEW BUTTON FOR EQUIPMENT RFID ASSIGNMENT */}
+            <button
+              onClick={() => setOpenRFIDEquipmentModal(true)}
+              style={{
+                padding: "10px",
+                width: "100%",
+                background: "#00b35a",
+                color: "white",
+                borderRadius: "6px",
+                border: "none",
+                cursor: "pointer",
+                fontWeight: "bold",
+                marginTop: "10px",
+              }}
+            >
+              Open RFID Equipment Connect
+            </button>
           </div>
         </>
       );
@@ -183,11 +203,21 @@ function App() {
         <AdminDashboard onLogout={handleAdminLogout} />
       )}
 
+      {/* EXISTING CUSTOMER-RFID CONNECT MODAL */}
       {userRole === "staff" && openRFIDModal && (
         <AddRFIDModal
           cardID={lastScannedCard}
           onClose={() => setOpenRFIDModal(false)}
           onConnect={() => setOpenRFIDModal(false)}
+        />
+      )}
+
+      {/* ⭐ NEW EQUIPMENT-RFID CONNECT MODAL */}
+      {userRole === "staff" && openRFIDEquipmentModal && (
+        <AddRFIDEquipmentModal
+          cardID={lastScannedCard}
+          onClose={() => setOpenRFIDEquipmentModal(false)}
+          onConnect={() => setOpenRFIDEquipmentModal(false)}
         />
       )}
 
