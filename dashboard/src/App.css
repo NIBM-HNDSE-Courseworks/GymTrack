@@ -1,26 +1,20 @@
-/* src/App.css - Main Layout & Global Dark Theme */
-
-/* 1. Full Screen and Dark Background */
-body,
-#root,
-.App {
+/* Base */
+body, #root, .App {
   min-height: 100vh;
   margin: 0;
   padding: 0;
-  display: flex; /* Makes the app container a flex item */
-  flex-direction: column; /* Stacks header, content, and footer vertically */
+  display: flex;
+  flex-direction: column;
 }
 
 .App {
   text-align: center;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  /* Main Dark Mode Background: Very dark, almost black */
   background-color: #0d1117;
-  color: #c9d1d9; /* Light gray text for high contrast */
-  flex-grow: 1; /* Allows the App to fill the rest of the height */
+  color: #c9d1d9;
+  font-family: "Segoe UI";
 }
 
-/* 2. Header Style */
+/* Header */
 .App-header-title {
   background-color: #161b22;
   padding: 20px;
@@ -28,101 +22,194 @@ body,
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-  flex-shrink: 0; /* Prevents header from shrinking */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.6);
 }
 
-.header-actions {
-  display: flex;
-  align-items: center;
+.logout-btn {
+  padding: 8px 15px;
+  background: #f85149;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
 }
 
-/* 3. Dashboard Grid Layout (Responsive Grid) */
+/* Dashboard Wrapper */
 .dashboard-grid {
-  flex-grow: 1; /* Makes the grid fill the remaining height */
-  display: grid;
-  /* Responsive columns: 2 columns for large screens, 1 for small */
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 30px;
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
   padding: 30px;
-  max-width: 1400px; /* Max width for central alignment */
   width: 100%;
-  margin: 0 auto; /* Center the grid */
-  align-items: start; /* Align items to the top of their grid cell */
 }
 
-/* Full-width component for staff controls or welcome panel */
-.staff-controls,
-.welcome-panel {
-  grid-column: 1 / -1; /* Spans all columns */
-  padding: 10px;
-  border-radius: 8px;
-  background-color: #161b22;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+/* LEFT + RIGHT */
+.dashboard-layout {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  width: 100%;
+  max-width: 1500px;
 }
 
-/* Component Styling for full-page integration */
+.left-panel {
+  flex: 1;
+  max-width: 800px;
+}
+
+.right-panel {
+  flex: 1;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* Equal height wrapper for right side cards */
+.equal-card-wrap {
+  width: 100%;
+}
+
+.equal-card-wrap > * {
+  width: 100% !important;
+  max-width: 700px !important;
+  margin: 0 auto;
+}
+
+/* Staff buttons */
+.staff-controls {
+  margin-top: 10px;
+  width: 100%;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.staff-btn {
+  padding: 12px;
+  width: 100%;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 12px;
+}
+
+.staff-btn.blue { background: #4e8cff; }
+.staff-btn.green { background: #00b35a; }
+
+/* Card style */
 .tracker-card {
   background-color: #161b22;
   border: 1px solid #30363d;
   border-radius: 8px;
+  padding: 25px;
+  margin: 0 auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+
+/* ============================
+   NEW EMPTY HERO (TEXT ON IMAGE)
+============================= */
+.empty-hero {
+  width: 100%;
+  height: 70vh;
+
+  background: url("/public/assets/empty-gym.png") center/cover no-repeat;
+  border-radius: 0;
+  position: relative;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  margin-top: 40px;
+}
+
+/* Dark overlay for readability */
+.empty-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.empty-hero-overlay {
+  position: relative;
+  z-index: 2;
+  max-width: 650px;
   padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.empty-hero-overlay h1 {
+  color: #ffffff;
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.empty-hero-overlay p {
+  color: #e5e5e5;
+  font-size: 1.25rem;
+  margin-bottom: 25px;
+  opacity: 0.95;
+}
+
+/* =================================
+   ANIMATED DOTS + HINT TEXT
+================================= */
+.empty-hero-hint {
+  margin-top: 18px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  text-align: center;
-  height: auto; /* Allow card height to be natural */
-  min-height: 150px;
+  align-items: center;
+  gap: 8px;
 }
 
-.tracker-card h2 {
-  margin-top: 0;
-  color: #58a6ff; /* Keep blue accent for titles */
+.empty-hint-text {
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #d1d5db;
 }
 
-.tracker-card p {
-  font-size: 1.1em;
-  color: #c9d1d9;
+/* Animated dots */
+.empty-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* Capacity specific styling */
-.capacity-card {
-  grid-column: 1 / -1; /* Capacity spans full width */
-}
-.capacity-indicator {
-  font-size: 1.5em;
-  font-weight: bold;
-  padding: 10px;
-  border-radius: 4px;
-  margin: 15px 0;
-  color: #0d1117; /* Dark text for status indicators */
+.empty-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4e8cff;
+  margin: 0 4px;
+  animation: empty-dot-bounce 1s infinite ease-in-out;
+  opacity: 0.35;
 }
 
-/* MODIFIED: Changed buttons from bright green to dark background with blue border */
-.capacity-buttons button {
-  padding: 8px 15px;
-  margin: 0 5px;
-  background-color: #161b22; /* Dark background */
-  color: #58a6ff; /* Blue text */
-  border: 1px solid #58a6ff; /* Blue border accent */
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s, color 0.2s;
+.empty-dots span:nth-child(2) {
+  animation-delay: 0.15s;
 }
 
-.capacity-buttons button:hover {
-  background-color: #58a6ff; /* Hover makes it solid blue */
-  color: #0d1117; /* Dark text on hover */
+.empty-dots span:nth-child(3) {
+  animation-delay: 0.3s;
 }
 
-/* 4. Footer */
-.footer-note {
-  padding: 20px;
-  border-top: 1px solid #30363d;
-  background-color: #161b22;
-  margin-top: auto;
-  font-size: 0.9em;
-  color: #8b949e;
-  flex-shrink: 0; /* Prevents footer from shrinking */
+@keyframes empty-dot-bounce {
+  0%, 80%, 100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  40% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
 }

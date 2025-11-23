@@ -9,8 +9,8 @@
 #include <time.h>
 
 // --- WiFi ---
-#define WIFI_SSID "Dialog 4G 375"
-#define WIFI_PASSWORD "e7AE2007"
+#define WIFI_SSID "Hirantha's Galaxy M31"
+#define WIFI_PASSWORD "Hira@2413"
 
 // --- Firebase ---
 #define FIREBASE_HOST "smartgymtracker-4123b-default-rtdb.firebaseio.com"

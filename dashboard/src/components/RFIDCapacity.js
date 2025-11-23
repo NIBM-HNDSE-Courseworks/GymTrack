@@ -94,23 +94,101 @@ function CustomerInsideStatus() {
     return () => unsubscribe();
   }, [selectedDate]);
 
-  // Prepare chart data (1 scan per user per hour)
-  const chartData = Array.from({ length: 24 }, (_, i) => {
-    const usersSeen = new Set();
+  // -------------------------------------------------------------
+  // UNIQUE CUSTOMERS PER HOUR (Option A)
+  // -------------------------------------------------------------
+  const chartData = Array.from({ length: 24 }, (_, hr) => {
+    const seen = new Set();
     logData.forEach((entry) => {
       if (
         entry.date === selectedDate &&
-        entry.hour === i &&
+        entry.hour === hr &&
         entry.action === "in"
       ) {
-        usersSeen.add(entry.customerUID);
+        seen.add(entry.customerUID);
       }
     });
-    return { hour: `${i}:00`, count: usersSeen.size };
+
+    return { hour: `${hr}:00`, count: seen.size };
   });
 
-  const leftColumn = customers.filter((_, index) => index % 2 === 0);
-  const rightColumn = customers.filter((_, index) => index % 2 !== 0);
+  // ---------------- PEAK TIME OF EACH DAY (LAST WEEK) ----------------
+  const uniqueDates = [...new Set(logData.map((log) => log.date))].sort();
+  const last7Dates = uniqueDates.slice(-7);
+
+  const dailyPeaksRaw = last7Dates.map((day) => {
+    const hourMap = {};
+
+    // Build unique-customer sets per hour
+    for (let hr = 0; hr < 24; hr++) hourMap[hr] = new Set();
+
+    logData.forEach((entry) => {
+      if (entry.date === day && entry.action === "in") {
+        hourMap[entry.hour].add(entry.customerUID);
+      }
+    });
+
+    const hourCounts = Object.values(hourMap).map((set) => set.size);
+    const maxVal = Math.max(...hourCounts);
+
+    // Find hours that share the peak value
+    const peakHours = Object.entries(hourMap)
+      .filter(([hr, set]) => set.size === maxVal && maxVal > 0)
+      .map(([hr]) => parseInt(hr));
+
+    // Convert peak hours → ranges
+    let ranges = [];
+    if (peakHours.length > 0) {
+      let start = peakHours[0];
+      let prev = peakHours[0];
+
+      for (let i = 1; i < peakHours.length; i++) {
+        if (peakHours[i] === prev + 1) {
+          prev = peakHours[i];
+        } else {
+          ranges.push([start, prev]);
+          start = peakHours[i];
+          prev = peakHours[i];
+        }
+      }
+      ranges.push([start, prev]);
+    }
+
+    const formattedRanges =
+      ranges
+        .map(([a, b]) => (a === b ? `${a}:00` : `${a}:00 - ${b}:00`))
+        .join(", ") || "No Data";
+
+    return {
+      date: day,
+      shortDate: new Date(day).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+      weekday: new Date(day).toLocaleDateString("en-US", { weekday: "long" }),
+      peakRange: formattedRanges,
+      count: maxVal,
+    };
+  });
+
+  // Sort Monday → Sunday
+  const weekOrder = {
+    Monday: 1,
+    Tuesday: 2,
+    Wednesday: 3,
+    Thursday: 4,
+    Friday: 5,
+    Saturday: 6,
+    Sunday: 7,
+  };
+
+  const dailyPeaks = dailyPeaksRaw.sort(
+    (a, b) => weekOrder[a.weekday] - weekOrder[b.weekday]
+  );
+
+  // Split customer list into columns
+  const leftColumn = customers.filter((_, i) => i % 2 === 0);
+  const rightColumn = customers.filter((_, i) => i % 2 !== 0);
 
   const renderContent = () => {
     if (isLoading)
@@ -119,6 +197,7 @@ function CustomerInsideStatus() {
           Loading member data...
         </p>
       );
+
     if (customers.length === 0)
       return (
         <p
@@ -135,38 +214,41 @@ function CustomerInsideStatus() {
 
     return (
       <>
+        {/* --- CUSTOMER LIST --- */}
         <div className="customer-grid">
           <div className="customer-column">
-            {leftColumn.map((customer, index) => (
-              <div key={customer.cardId || index} className="customer-item">
+            {leftColumn.map((c, index) => (
+              <div key={c.cardId || index} className="customer-item">
                 <div
                   className={`status-dot ${
-                    customer.inside === 1 ? "dot-green" : "dot-red"
+                    c.inside === 1 ? "dot-green" : "dot-red"
                   }`}
                 ></div>
-                <span style={{ color: "white" }}>{customer.name}</span>
+                <span style={{ color: "white" }}>{c.name}</span>
               </div>
             ))}
           </div>
+
           <div className="customer-column">
-            {rightColumn.map((customer, index) => (
-              <div key={customer.cardId || index} className="customer-item">
+            {rightColumn.map((c, index) => (
+              <div key={c.cardId || index} className="customer-item">
                 <div
                   className={`status-dot ${
-                    customer.inside === 1 ? "dot-green" : "dot-red"
+                    c.inside === 1 ? "dot-green" : "dot-red"
                   }`}
                 ></div>
-                <span style={{ color: "white" }}>{customer.name}</span>
+                <span style={{ color: "white" }}>{c.name}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* ----- Peak Hours Chart ----- */}
+        {/* ---- PEAK HOURS CHART ---- */}
         <div style={{ marginTop: "35px" }}>
           <h3 style={{ color: "orange", marginBottom: "15px" }}>
             📊 Peak Hours
           </h3>
+
           <select
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
@@ -188,8 +270,7 @@ function CustomerInsideStatus() {
             ))}
           </select>
 
-          {/* Expanded chart width */}
-          <ResponsiveContainer width="250%" height={350}>
+          <ResponsiveContainer width="480%" height={350}>
             <AreaChart
               data={chartData}
               margin={{ top: 15, right: 0, left: 0, bottom: 5 }}
@@ -200,6 +281,7 @@ function CustomerInsideStatus() {
                   <stop offset="95%" stopColor="#FFA500" stopOpacity={0} />
                 </linearGradient>
               </defs>
+
               <XAxis dataKey="hour" stroke="#fff" />
               <YAxis allowDecimals={false} stroke="#fff" />
               <CartesianGrid strokeDasharray="3 3" stroke="#444" />
@@ -220,6 +302,56 @@ function CustomerInsideStatus() {
             </AreaChart>
           </ResponsiveContainer>
         </div>
+
+        {/* ---- LAST 7 DAYS PEAK CARDS ---- */}
+        <h3
+          style={{
+            color: "orange",
+            marginTop: "40px",
+            marginBottom: "15px",
+          }}
+        >
+          🔥 Peak Time — Last 7 Days
+        </h3>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gap: "20px",
+            width: "100%",
+          }}
+        >
+          {dailyPeaks.map((day) => (
+            <div
+              key={day.date}
+              style={{
+                background: "#1f2937",
+                padding: "22px",
+                borderRadius: "14px",
+                border: "1px solid #FFA500",
+                width: "100%",
+              }}
+            >
+              <h4 style={{ color: "orange", marginBottom: "10px" }}>
+                {day.weekday} ({day.shortDate})
+              </h4>
+
+              <p style={{ color: "#fff", fontSize: "1.15em" }}>
+                Peak Hours:{" "}
+                <span style={{ color: "#FFA500", fontWeight: "bold" }}>
+                  {day.peakRange}
+                </span>
+              </p>
+
+              <p
+                style={{ color: "#ccc", fontSize: "0.95em", marginTop: "6px" }}
+              >
+                Customers: {day.count}
+              </p>
+            </div>
+          ))}
+        </div>
       </>
     );
   };
@@ -234,70 +366,9 @@ function CustomerInsideStatus() {
 
 // ----------------- Main RFID Tracker -----------------
 function RFIDTracker() {
-  const [currentUsers, setCurrentUsers] = useState(0);
-
-  useEffect(() => {
-    const usersRef = ref(db, "users");
-    const unsubscribe = onValue(usersRef, (snapshot) => {
-      const usersData = snapshot.val();
-      if (!usersData) {
-        setCurrentUsers(0);
-        return;
-      }
-      let insideCount = 0;
-      Object.values(usersData).forEach((userData) => {
-        if (userData && userData.inside === 1) insideCount += 1;
-      });
-      setCurrentUsers(insideCount);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const indicatorColor =
-    currentUsers >= MAX_CAPACITY_ALERT
-      ? "#d9534f"
-      : currentUsers >= HIGH_CAPACITY_WARNING
-      ? "#f0ad4e"
-      : "#5cb85c";
-
-  const statusText =
-    currentUsers >= MAX_CAPACITY_ALERT
-      ? "MAX CAPACITY REACHED!"
-      : currentUsers >= HIGH_CAPACITY_WARNING
-      ? "Crowded"
-      : currentUsers > 0
-      ? "Optimal"
-      : "Empty";
-
   return (
     <>
-      <div className="tracker-card capacity-card">
-        <h2>👤 Gym Capacity (Crowdedness)</h2>
-        <div
-          className="status-indicator capacity-indicator"
-          style={{ backgroundColor: indicatorColor }}
-        >
-          <span
-            style={{ color: "white", fontSize: "1.5em", fontWeight: "bold" }}
-          >
-            {statusText}
-          </span>
-        </div>
-        <div className="capacity-display">
-          <p
-            style={{ color: "orange", fontSize: "1.2em", marginBottom: "5px" }}
-          >
-            Current Members Inside:
-          </p>
-          <div style={{ color: "white", fontSize: "4em", fontWeight: "900" }}>
-            {currentUsers}
-          </div>
-          <p style={{ color: "white", opacity: 0.7, marginTop: "5px" }}>
-            Tracking up to {MAX_CAPACITY_ALERT} for alert.
-          </p>
-        </div>
-      </div>
-
+      {/* ❌ Crowded / Capacity section removed completely */}
       <CustomerInsideStatus />
     </>
   );

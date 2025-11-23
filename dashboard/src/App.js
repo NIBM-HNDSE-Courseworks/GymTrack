@@ -1,14 +1,14 @@
+// App.js
 import React, { useState, useEffect } from "react";
 import "./App.css";
 
-// <span style="color:white">Component Imports (unchanged)</span>
 import UltrasonicTracker from "./components/UltrasonicTracker";
 import CurrentSensorTracker from "./components/CurrentSensorTracker";
 import LoadCellTracker from "./components/LoadCellTracker";
 import RFIDEquipment from "./components/RFIDEquipment";
 import RFIDCapacity from "./components/RFIDCapacity";
 import AddRFIDModal from "./components/AddRFIDModal";
-import AddRFIDEquipmentModal from "./components/AddRFIDEquipmentModal";   // ⭐ NEW IMPORT
+import AddRFIDEquipmentModal from "./components/AddRFIDEquipmentModal";
 
 import LoginButton from "./components/LoginButton";
 import AuthModal from "./components/AuthModal";
@@ -19,6 +19,8 @@ import { auth, db } from "./Firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { ref, get, onValue } from "firebase/database";
 
+import CrowdedSummaryCard from "./components/CrowdedSummaryCard";
+
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentRoute, setCurrentRoute] = useState("dashboard");
@@ -26,13 +28,11 @@ function App() {
   const [userRole, setUserRole] = useState(null);
 
   const [openRFIDModal, setOpenRFIDModal] = useState(false);
-  const [openRFIDEquipmentModal, setOpenRFIDEquipmentModal] = useState(false); // ⭐ NEW STATE
+  const [openRFIDEquipmentModal, setOpenRFIDEquipmentModal] = useState(false);
   const [lastScannedCard, setLastScannedCard] = useState(null);
-
-  // NEW: Prevent auto-login loop for admin
   const [adminLoggedOut, setAdminLoggedOut] = useState(false);
 
-  // AUTH LISTENER
+  // ---------------- AUTH ----------------
   useEffect(() => {
     return onAuthStateChanged(auth, async (user) => {
       if (!user) {
@@ -43,7 +43,6 @@ function App() {
 
       setUser(user);
 
-      // <span style="color:white">FETCH ROLE LOGIC</span>
       let snap = await get(ref(db, `customers/${user.uid}`));
       if (snap.exists()) return setUserRole(snap.val().role);
 
@@ -52,13 +51,12 @@ function App() {
     });
   }, []);
 
-  // RFID CARD LISTENER
+  // ---------------- RFID LISTENER ----------------
   useEffect(() => {
     const cardRef = ref(db, "last_scanned_card");
     return onValue(cardRef, (snap) => {
-      const cardID = snap.val();
-      if (!cardID) return;
-      setLastScannedCard(cardID);
+      const id = snap.val();
+      if (id) setLastScannedCard(id);
     });
   }, []);
 
@@ -69,87 +67,113 @@ function App() {
     setCurrentRoute("dashboard");
   };
 
-  // FIXED: Admin logout now sets a flag
   const handleAdminLogout = () => {
-    setCurrentRoute("dashboard"); // go back to home
-    setAdminLoggedOut(true); // prevent auto-login
+    setCurrentRoute("dashboard");
+    setAdminLoggedOut(true);
   };
 
+  const renderEmptyDashboard = () => (
+    <div className="empty-hero">
+      <div className="empty-hero-overlay">
+        <h1>Welcome to GymTrack</h1>
+        <p>Your smart gym companion for real-time activity tracking.</p>
+
+        <div className="empty-hero-hint">
+          <span className="empty-hint-text">
+            Use the Login button above to get started
+          </span>
+
+          <div className="empty-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ---------------- MAIN UI ----------------
   const renderDashboardContent = () => {
-    // <span style="color:white">Only show content if user is logged in AND has a role</span>
+    if (!userRole) return renderEmptyDashboard();
+
+    // CUSTOMER VIEW
     if (userRole === "customer") {
       return (
-        <>
-          <UltrasonicTracker equipmentId="SQT01" initialStatus="FREE" />
-          <CurrentSensorTracker equipmentId="TRD01" initialStatus="FREE" />
-          <LoadCellTracker equipmentId="DMR05" />
-          <RFIDCapacity />
-        </>
+        <div className="dashboard-layout">
+          {/* LEFT SIDE */}
+          <div className="left-panel">
+            <RFIDCapacity />
+          </div>
+
+          {/* RIGHT SIDE (ALL EQUAL HEIGHT) */}
+          <div className="right-panel">
+            <div className="equal-card-wrap">
+              <CrowdedSummaryCard />
+            </div>
+
+            <div className="equal-card-wrap">
+              <UltrasonicTracker equipmentId="SQT01" initialStatus="FREE" />
+            </div>
+
+            <div className="equal-card-wrap">
+              <CurrentSensorTracker equipmentId="TRD01" initialStatus="FREE" />
+            </div>
+
+            <div className="equal-card-wrap">
+              <LoadCellTracker equipmentId="DMR05" />
+            </div>
+          </div>
+        </div>
       );
     }
 
+    // STAFF VIEW — left: peak graph, right: equipment + buttons
     if (userRole === "staff") {
       return (
-        <>
-          <RFIDCapacity />
-          <RFIDEquipment />
-          <div className="staff-controls">
-            <button
-              onClick={() => setOpenRFIDModal(true)}
-              style={{
-                padding: "10px",
-                width: "100%",
-                background: "#4e8cff",
-                color: "white",
-                borderRadius: "6px",
-                border: "none",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-            >
-              Open RFID Connect
-            </button>
-
-            {/* ⭐ NEW BUTTON FOR EQUIPMENT RFID ASSIGNMENT */}
-            <button
-              onClick={() => setOpenRFIDEquipmentModal(true)}
-              style={{
-                padding: "10px",
-                width: "100%",
-                background: "#00b35a",
-                color: "white",
-                borderRadius: "6px",
-                border: "none",
-                cursor: "pointer",
-                fontWeight: "bold",
-                marginTop: "10px",
-              }}
-            >
-              Open RFID Equipment Connect
-            </button>
+        <div className="dashboard-layout">
+          {/* LEFT SIDE */}
+          <div className="left-panel">
+            <RFIDCapacity />
           </div>
-        </>
+
+          {/* RIGHT SIDE */}
+          <div className="right-panel">
+            <RFIDEquipment />
+
+            <div className="staff-controls">
+              <button
+                onClick={() => setOpenRFIDModal(true)}
+                className="staff-btn blue"
+              >
+                Open RFID Connect
+              </button>
+
+              <button
+                onClick={() => setOpenRFIDEquipmentModal(true)}
+                className="staff-btn green"
+              >
+                Open RFID Equipment Connect
+              </button>
+            </div>
+          </div>
+        </div>
       );
     }
 
-    // <span style="color:white">Default view when not logged in (or role not loaded)</span>
-    return (
-      <div className="welcome-panel">
-        <h2>Welcome to GymTrack Dashboard</h2>
-        <p>Please log in to view your personalized tracking data.</p>
-      </div>
-    );
+    return renderEmptyDashboard();
   };
 
-  // <span style="color:white">Logic remains the same for display purposes</span>
   const isLoggedInUser = user && currentRoute !== "admin-dashboard";
   const isLoggedInAdmin = currentRoute === "admin-dashboard";
 
   return (
     <div className="App">
+      {/* HEADER */}
       <header className="App-header-title">
         <div style={{ display: "flex", alignItems: "center" }}>
           <h1>GymTrack Dashboard || </h1>
+
           {isLoggedInUser && (
             <p style={{ marginLeft: 20, color: "orange", fontWeight: "bold" }}>
               Logged in as:{" "}
@@ -158,6 +182,7 @@ function App() {
               </span>
             </p>
           )}
+
           {isLoggedInAdmin && (
             <p style={{ marginLeft: 20, color: "orange", fontWeight: "bold" }}>
               Logged in as: <span style={{ color: "white" }}>Admin</span>
@@ -169,19 +194,9 @@ function App() {
           {!user && currentRoute !== "admin-dashboard" && (
             <LoginButton onClick={() => setIsModalOpen(true)} />
           )}
+
           {isLoggedInUser && (
-            <button
-              onClick={handleLogout}
-              style={{
-                padding: "8px 15px",
-                background: "#f85149",
-                color: "white",
-                borderRadius: 4,
-                border: "none",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-            >
+            <button onClick={handleLogout} className="logout-btn">
               Logout
             </button>
           )}
@@ -203,7 +218,7 @@ function App() {
         <AdminDashboard onLogout={handleAdminLogout} />
       )}
 
-      {/* EXISTING CUSTOMER-RFID CONNECT MODAL */}
+      {/* RFID MODALS */}
       {userRole === "staff" && openRFIDModal && (
         <AddRFIDModal
           cardID={lastScannedCard}
@@ -212,7 +227,6 @@ function App() {
         />
       )}
 
-      {/* ⭐ NEW EQUIPMENT-RFID CONNECT MODAL */}
       {userRole === "staff" && openRFIDEquipmentModal && (
         <AddRFIDEquipmentModal
           cardID={lastScannedCard}
