@@ -358,8 +358,4 @@
 /* Fade-out animation */
 .popup-closing {
   animation: popupFadeOut 0.18s ease forwards;
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 39925ab043aa57ee2665b2a255b95b31a35a8c14

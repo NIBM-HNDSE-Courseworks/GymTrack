@@ -15,13 +15,8 @@ function UltrasonicTracker() {
     }[state] || "#6e7681";
 
   useEffect(() => {
-<<<<<<< HEAD
     const statusRef = ref(db, `/equipment/bench1/status`);
     const distanceRef = ref(db, `/equipment/bench1/distance`);
-=======
-    const statusRef = ref(db, /equipment/bench1/status);
-    const distanceRef = ref(db, /equipment/bench1/distance);
->>>>>>> 39925ab043aa57ee2665b2a255b95b31a35a8c14
 
     const unsub1 = onValue(statusRef, (snapshot) => {
       const value = snapshot.val();
