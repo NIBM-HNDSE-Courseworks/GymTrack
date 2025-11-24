@@ -1,101 +1,58 @@
-/* src/components/CurrentSensorTracker.css */
+/* === GitHub Dark + Minimal Dashboard Theme === */
 
-/* General Card and Group Styling */
-.tracker-group {
-    border: 1px solid #333;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    margin: 20px;
-    padding: 15px;
-    background-color: #1e1e1e; /* Dark background */
-    color: #f0f0f0; /* Light text */
-    max-width: 400px;
-}
+.tracker-card-panel {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 14px;
+  padding: 20px;
+  color: #c9d1d9;
+  width: 100%;
 
-.group-header h2 {
-    color: #007bff; /* Accent color for title */
-    border-bottom: 2px solid #444;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-    font-size: 1.5em;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+
+  box-shadow: 0px 8px 22px rgba(0,0,0,0.55);
 }
 
-.tracker-card {
-    padding: 15px;
-    background-color: #2a2a2a;
-    border-radius: 8px;
+/* HEADER */
+.panel-header h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #58a6ff;
+  margin: 0 0 6px 0;
 }
 
-/* Loading State */
-.loading-state {
-    text-align: center;
-    padding: 20px;
+/* LOADING */
+.loading-box {
+  text-align: center;
+  padding: 14px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  color: #8b949e;
 }
 
-/* Current Sensor Specific Styles */
-.current-sensor-card {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+/* VALUE BOX */
+.value-box label {
+  font-size: 0.9rem;
+  color: #8b949e;
 }
 
-/* Reading Box for Raw Current Value */
-.current-reading-box {
-    /*background-color: #3b3b3b;
-    padding: 10px 15px;
-    border-radius: 6px;*/
-    text-align: center;
+.value-number {
+  margin-top: 4px;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #e6edf3;
 }
 
-.reading-label {
-    margin: 0;
-    font-size: 0.9em;
-    color: #ccc;
-}
-
-.reading-value {
-    margin: 5px 0 0;
-    font-size: 2.2em;
-    font-weight: bold;
-    color: #ff9800; /* Orange/Yellow emphasis for the value */
-}
-
-/* Status Indicator (Usage Status) */
-.status-indicator {
-    padding: 12px;
-    border-radius: 6px;
-    color: #1e1e1e; /* Dark text for contrast */
-    text-align: center;
-    font-weight: bold;
-    font-size: 1.1em;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-}
-
-/* Threshold Note */
-/*
-.threshold-note {
-    margin: 0;
-    padding-top: 5px;
-    font-size: 0.8em;
-    text-align: center;
-    color: #8b949e;
-    border-top: 1px dashed #444;
-}
-*/
-/* Reusing the Login Button CSS if the component is used elsewhere */
-.login-button {
-    padding: 10px 20px;
-    background-color: #007bff; /* Primary Blue Accent */
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    font-weight: bold;
-    transition: background-color 0.2s;
-    margin-left: 15px;
-}
-.login-button:hover {
-    background-color: #0056b3; /* Darker blue on hover */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+/* STATUS PILL */
+.status-pill {
+  margin-top: 6px;
+  padding: 12px;
+  text-align: center;
+  border-radius: 10px;
+  font-weight: 700;
+  color: #0d1117;
+  font-size: 1rem;
 }

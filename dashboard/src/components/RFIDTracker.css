@@ -195,6 +195,17 @@
   position: relative;
 }
 
+/* Hover zoom for equipment cards */
+.equip-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+}
+
+.equip-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(88,166,255,0.25); /* soft blue glow to match theme */
+}
+
 .equip-title {
   font-size: 1.3rem;
   font-weight: bold;
@@ -217,4 +228,134 @@
   position: absolute;
   right: 10px;
   top: 10px;
+}
+
+
+
+
+
+/* =========================== */
+/* PEAK CARDS — GRID + HOVER 🔥 */
+/* =========================== */
+
+.peak-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+
+.peak-card {
+  background: #1f2937;
+  padding: 22px;
+  border-radius: 14px;
+  border: 1px solid #FFA500;
+  width: 100%;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+}
+
+/* 👇 Hover Zoom Effect */
+.peak-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(255, 165, 0, 0.25);
+}
+
+
+
+
+
+
+/* ============================== */
+/* POPUP FOR STAFF CLICK DETAILS  */
+/* ============================== */
+
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
+
+.popup-box {
+  background: #1f2937;
+  padding: 25px;
+  border-radius: 12px;
+  width: 360px;
+
+  /* changed border from orange → blue */
+  border: 1px solid #58a6ff;
+
+  text-align: center;
+  animation: popupFade 0.2s ease;
+}
+
+.popup-large {
+  width: 420px;
+}
+
+/* Wrapper for list-type cards */
+.popup-list-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+  margin-bottom: 25px;
+}
+
+/* Each card in list format */
+.popup-name-card {
+  background: #111827;
+  padding: 10px 15px;
+  border-radius: 8px;
+
+  /* BORDER: orange → soft blue */
+  border: 1px solid #58a6ff;
+
+  color: white;
+  font-size: 0.95em;
+  font-weight: 600;
+  text-align: left;
+
+  /* SHADOW: removed orange glow → soft blue */
+  box-shadow: 0 0 8px rgba(88,166,255,0.15);
+
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+}
+
+/* Hover zoom — blue glow */
+.popup-name-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(88,166,255,0.28);
+}
+
+/* Close button remains orange for emphasis */
+.popup-close-btn {
+  margin-top: 10px;
+  background: orange;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #111;
+}
+
+@keyframes popupFade {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes popupFadeOut {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(0.8); opacity: 0; }
+}
+
+/* Fade-out animation */
+.popup-closing {
+  animation: popupFadeOut 0.18s ease forwards;
 }

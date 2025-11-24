@@ -31,7 +31,7 @@ export default function CrowdedSummaryCard() {
       ? "#d9534f"
       : currentUsers >= HIGH_CAPACITY_WARNING
       ? "#f0ad4e"
-      : "#5cb85c";
+      : "#2ecc71";
 
   const statusText =
     currentUsers >= MAX_CAPACITY_ALERT

@@ -12,13 +12,12 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    /* Added transition for backdrop fade-out */
     transition: background 0.3s ease-out; 
 }
 
 /* Backdrop Fade Out */
 .modal-overlay.closing {
-    background: rgba(0, 0, 0, 0); /* Fade to transparent */
+    background: rgba(0, 0, 0, 0); 
 }
 
 /* Modal Card */
@@ -32,7 +31,6 @@
     max-width: 400px;
     position: relative;
     border: 1px solid #36404a;
-    /* Slide-In Animation */
     animation: slideIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; 
 }
 
@@ -48,7 +46,7 @@
     }
 }
 
-/* NEW: Slide-Out Animation Keyframes */
+/* Slide-Out Animation */
 @keyframes slideOut {
     from { 
         opacity: 1; 
@@ -56,15 +54,14 @@
     }
     to { 
         opacity: 0; 
-        transform: translateY(50px) scale(0.95); /* Slides down and fades out */
+        transform: translateY(50px) scale(0.95);
     }
 }
 
-/* Apply Slide-Out Animation when the 'closing' class is present */
+/* Apply slide-out when closing */
 .auth-card.closing {
     animation: slideOut 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards; 
 }
-
 
 .auth-card h2 {
     color: #4299e1;
@@ -75,7 +72,7 @@
     font-weight: 700;
 }
 
-/* Informational notes, like the one for Signup */
+/* Info text */
 .auth-form .note {
     font-size: 0.85em;
     color: #a0aec0;
@@ -85,6 +82,7 @@
     border-bottom: 1px dashed #36404a;
 }
 
+/* Close button */
 .close-button {
     position: absolute;
     top: 15px;
@@ -100,8 +98,7 @@
     color: #4299e1;
 }
 
-/* --- Form Styles --- */
-
+/* Labels */
 .auth-form label {
     display: block;
     text-align: left; 
@@ -111,6 +108,7 @@
     font-size: 0.95em;
 }
 
+/* Inputs */
 .auth-form input[type="text"],
 .auth-form input[type="email"],
 .auth-form input[type="password"] {
@@ -133,6 +131,7 @@
     color: #718096;
 }
 
+/* Submit button */
 .submit-button {
     width: 100%;
     padding: 14px;
@@ -153,7 +152,7 @@
     transform: translateY(0);
 }
 
-/* Link to switch to Sign Up/Log In */
+/* Switch login/signup link */
 .switch-auth-mode {
     margin-top: 25px;
     text-align: center;
@@ -177,7 +176,7 @@
     color: #63b3ed;
 }
 
-/* Error Message Style */
+/* Error message */
 .error-message {
     color: #fc8181;
     background-color: #443333;

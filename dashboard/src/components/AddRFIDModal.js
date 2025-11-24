@@ -10,8 +10,14 @@ function AddRFIDModal({ cardID, onClose, onConnect }) {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [assignedList, setAssignedList] = useState([]);
   const [isReloading, setIsReloading] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   const prevDataRef = useRef({ cards: [], customers: [], assigned: [] });
+
+  const triggerClose = () => {
+    setIsClosing(true);
+    setTimeout(() => onClose(), 300); // matches CSS fade-out
+  };
 
   const loadLists = async () => {
     const usersSnap = await get(ref(db, "users"));
@@ -58,7 +64,6 @@ function AddRFIDModal({ cardID, onClose, onConnect }) {
       });
     }
 
-    // Only update state if there’s a change
     const prev = prevDataRef.current;
     const cardsChanged =
       JSON.stringify(prev.cards) !== JSON.stringify(newCardList);
@@ -72,7 +77,6 @@ function AddRFIDModal({ cardID, onClose, onConnect }) {
       setUnassignedCustomers(newCustList);
       setAssignedList(enrichedAssigned);
 
-      // Keep previous selections if still valid
       if (!newCardList.includes(selectedCard)) {
         setSelectedCard(newCardList.length ? newCardList[0] : null);
       }
@@ -108,7 +112,6 @@ function AddRFIDModal({ cardID, onClose, onConnect }) {
       await set(ref(db, `users/${selectedCard}/uid`), selectedCustomer);
       await set(ref(db, `users/${selectedCard}/registered`), true);
       await loadLists();
-      // if (onConnect) onConnect();
       alert("Connected card to customer successfully.");
     } catch (err) {
       console.error("Connect error:", err);
@@ -116,16 +119,13 @@ function AddRFIDModal({ cardID, onClose, onConnect }) {
     }
   };
 
-  // *** NEW FUNCTION FOR DELETE/UNASSIGNMENT ***
   const handleUnassign = async (cardID) => {
     if (!window.confirm(`Are you sure you want to unassign card ${cardID}?`)) {
       return;
     }
 
     try {
-      // 1. Set uid to "" (empty string)
       await set(ref(db, `users/${cardID}/uid`), "");
-      // 2. Set 'inside' column to 0
       await set(ref(db, `users/${cardID}/inside`), 0);
 
       await loadLists();
@@ -135,11 +135,17 @@ function AddRFIDModal({ cardID, onClose, onConnect }) {
       alert("Failed to unassign card. See console.");
     }
   };
-  // *** END NEW FUNCTION ***
 
   return (
-    <div className="modal-overlay">
-      <div className="modal add-rfid-modal">
+    <div
+      className={`modal-overlay ${isClosing ? "closing" : ""}`}
+      onClick={triggerClose}
+    >
+      <div
+        className={`modal add-rfid-modal ${isClosing ? "closing" : ""}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Reload icon */}
         <div className="reload-status">
           <span
             className={`reload-icon ${isReloading ? "reloading" : ""}`}
@@ -154,6 +160,8 @@ function AddRFIDModal({ cardID, onClose, onConnect }) {
 
         <h2>User Connect</h2>
         <p>Connect unassigned RFID cards to customers without a card</p>
+
+        <div style={{ height: "10px" }}></div>
 
         <div className="lists-row">
           <div className="list-col">
@@ -198,6 +206,8 @@ function AddRFIDModal({ cardID, onClose, onConnect }) {
           </div>
         </div>
 
+        <div style={{ height: "20px" }}></div>
+
         <div className="connect-row">
           <button
             className="btn connect"
@@ -206,25 +216,29 @@ function AddRFIDModal({ cardID, onClose, onConnect }) {
           >
             Connect
           </button>
-          <button className="btn cancel" onClick={onClose}>
+          <button className="btn cancel" onClick={triggerClose}>
             Close
           </button>
         </div>
 
+        <div style={{ height: "25px" }}></div>
+
         <div className="assigned-section">
           <h3>Assigned Cards</h3>
+
           <div className="list">
             {assignedList.length === 0 && (
               <div className="list-empty">No assigned cards yet</div>
             )}
+
             {assignedList.map((a) => (
-              // *** UPDATED RENDERING FOR ASSIGNED CARDS ***
               <div key={a.cardID} className="list-item assigned-item">
                 <div className="assigned-info">
                   <strong>Card: {a.cardID}</strong>
                   <br />
                   Customer: {a.customerName} ({a.customerId})
                 </div>
+
                 <button
                   className="btn delete-btn"
                   onClick={() => handleUnassign(a.cardID)}
@@ -232,7 +246,6 @@ function AddRFIDModal({ cardID, onClose, onConnect }) {
                   &#x2715; Delete
                 </button>
               </div>
-              // *** END UPDATED RENDERING ***
             ))}
           </div>
         </div>

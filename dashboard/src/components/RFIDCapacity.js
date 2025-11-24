@@ -17,13 +17,18 @@ const MAX_CAPACITY_ALERT = 3;
 const HIGH_CAPACITY_WARNING = 2;
 
 // ----------------- Customer Inside Status -----------------
-function CustomerInsideStatus() {
+function CustomerInsideStatus({ userRole }) {
   const [customers, setCustomers] = useState([]);
   const [customerMap, setCustomerMap] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
   const [logData, setLogData] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
+
+  // NEW STATE FOR POPUP
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [popupHour, setPopupHour] = useState(null);
+  const [popupList, setPopupList] = useState([]);
 
   // Fetch Customer Names once
   useEffect(() => {
@@ -83,8 +88,8 @@ function CustomerInsideStatus() {
       }
       const logsArray = Object.values(data).map((entry) => ({
         ...entry,
-        date: entry.timestamp.split("T")[0], // YYYY-MM-DD
-        hour: parseInt(entry.timestamp.split("T")[1].split(":")[0]), // HH
+        date: entry.timestamp.split("T")[0],
+        hour: parseInt(entry.timestamp.split("T")[1].split(":")[0]),
       }));
       setLogData(logsArray);
       if (!selectedDate && logsArray.length > 0) {
@@ -94,9 +99,7 @@ function CustomerInsideStatus() {
     return () => unsubscribe();
   }, [selectedDate]);
 
-  // -------------------------------------------------------------
-  // UNIQUE CUSTOMERS PER HOUR (Option A)
-  // -------------------------------------------------------------
+  // Prepare chart data
   const chartData = Array.from({ length: 24 }, (_, hr) => {
     const seen = new Set();
     logData.forEach((entry) => {
@@ -109,17 +112,40 @@ function CustomerInsideStatus() {
       }
     });
 
-    return { hour: `${hr}:00`, count: seen.size };
+    return { hour: `${hr}:00`, hourNum: hr, count: seen.size };
   });
 
-  // ---------------- PEAK TIME OF EACH DAY (LAST WEEK) ----------------
+  // STAFF-ONLY POPUP LOGIC
+  const handleChartClick = (e) => {
+    if (!userRole || userRole !== "staff") return;
+    if (!e || !e.activeLabel) return;
+
+    const hourStr = e.activeLabel;
+    const hour = parseInt(hourStr);
+
+    const seen = new Set();
+    logData.forEach((entry) => {
+      if (
+        entry.date === selectedDate &&
+        entry.hour === hour &&
+        entry.action === "in"
+      ) {
+        seen.add(entry.customerUID);
+      }
+    });
+
+    const list = Array.from(seen).map((uid) => customerMap[uid]);
+    setPopupList(list);
+    setPopupHour(hourStr);
+    setPopupVisible(true);
+  };
+
+  // ---------------- LAST 7 DAYS PEAK CALC ----------------
   const uniqueDates = [...new Set(logData.map((log) => log.date))].sort();
   const last7Dates = uniqueDates.slice(-7);
 
   const dailyPeaksRaw = last7Dates.map((day) => {
     const hourMap = {};
-
-    // Build unique-customer sets per hour
     for (let hr = 0; hr < 24; hr++) hourMap[hr] = new Set();
 
     logData.forEach((entry) => {
@@ -130,18 +156,14 @@ function CustomerInsideStatus() {
 
     const hourCounts = Object.values(hourMap).map((set) => set.size);
     const maxVal = Math.max(...hourCounts);
-
-    // Find hours that share the peak value
     const peakHours = Object.entries(hourMap)
       .filter(([hr, set]) => set.size === maxVal && maxVal > 0)
       .map(([hr]) => parseInt(hr));
 
-    // Convert peak hours → ranges
     let ranges = [];
     if (peakHours.length > 0) {
       let start = peakHours[0];
       let prev = peakHours[0];
-
       for (let i = 1; i < peakHours.length; i++) {
         if (peakHours[i] === prev + 1) {
           prev = peakHours[i];
@@ -171,7 +193,6 @@ function CustomerInsideStatus() {
     };
   });
 
-  // Sort Monday → Sunday
   const weekOrder = {
     Monday: 1,
     Tuesday: 2,
@@ -186,10 +207,11 @@ function CustomerInsideStatus() {
     (a, b) => weekOrder[a.weekday] - weekOrder[b.weekday]
   );
 
-  // Split customer list into columns
+  // Split customer list
   const leftColumn = customers.filter((_, i) => i % 2 === 0);
   const rightColumn = customers.filter((_, i) => i % 2 !== 0);
 
+  // UI
   const renderContent = () => {
     if (isLoading)
       return (
@@ -214,7 +236,7 @@ function CustomerInsideStatus() {
 
     return (
       <>
-        {/* --- CUSTOMER LIST --- */}
+        {/* CUSTOMER LIST */}
         <div className="customer-grid">
           <div className="customer-column">
             {leftColumn.map((c, index) => (
@@ -243,7 +265,7 @@ function CustomerInsideStatus() {
           </div>
         </div>
 
-        {/* ---- PEAK HOURS CHART ---- */}
+        {/* PEAK HOURS CHART */}
         <div style={{ marginTop: "35px" }}>
           <h3 style={{ color: "orange", marginBottom: "15px" }}>
             📊 Peak Hours
@@ -274,6 +296,7 @@ function CustomerInsideStatus() {
             <AreaChart
               data={chartData}
               margin={{ top: 15, right: 0, left: 0, bottom: 5 }}
+              onClick={handleChartClick}
             >
               <defs>
                 <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
@@ -303,7 +326,7 @@ function CustomerInsideStatus() {
           </ResponsiveContainer>
         </div>
 
-        {/* ---- LAST 7 DAYS PEAK CARDS ---- */}
+        {/* LAST 7 DAYS PEAK CARDS */}
         <h3
           style={{
             color: "orange",
@@ -314,25 +337,9 @@ function CustomerInsideStatus() {
           🔥 Peak Time — Last 7 Days
         </h3>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-            gap: "20px",
-            width: "100%",
-          }}
-        >
+        <div className="peak-card-grid">
           {dailyPeaks.map((day) => (
-            <div
-              key={day.date}
-              style={{
-                background: "#1f2937",
-                padding: "22px",
-                borderRadius: "14px",
-                border: "1px solid #FFA500",
-                width: "100%",
-              }}
-            >
+            <div key={day.date} className="peak-card">
               <h4 style={{ color: "orange", marginBottom: "10px" }}>
                 {day.weekday} ({day.shortDate})
               </h4>
@@ -352,6 +359,56 @@ function CustomerInsideStatus() {
             </div>
           ))}
         </div>
+
+        {/* POPUP FOR STAFF */}
+        {popupVisible && (
+          <div className="popup-overlay">
+            <div className="popup-box popup-large">
+              <h2 style={{ color: "orange", marginBottom: "10px" }}>
+                {selectedDate} — {popupHour}
+              </h2>
+
+              <p
+                style={{
+                  color: "white",
+                  fontSize: "1.1em",
+                  marginBottom: "20px",
+                }}
+              >
+                Total Count:{" "}
+                <span style={{ color: "orange", fontWeight: "bold" }}>
+                  {popupList.length}
+                </span>
+              </p>
+
+              {popupList.length === 0 ? (
+                <p style={{ color: "white" }}>No customers found.</p>
+              ) : (
+                <div className="popup-list-card-wrapper">
+                  {popupList.map((name, i) => (
+                    <div key={i} className="popup-name-card list-card">
+                      {i + 1}. {name}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <button
+                className="popup-close-btn"
+                onClick={() => {
+                  document
+                    .querySelector(".popup-box")
+                    .classList.add("popup-closing");
+                  setTimeout(() => {
+                    setPopupVisible(false);
+                  }, 180); // match fade-out duration
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </>
     );
   };
@@ -364,12 +421,11 @@ function CustomerInsideStatus() {
   );
 }
 
-// ----------------- Main RFID Tracker -----------------
-function RFIDTracker() {
+// Main exporter with role forwarding
+function RFIDTracker({ userRole }) {
   return (
     <>
-      {/* ❌ Crowded / Capacity section removed completely */}
-      <CustomerInsideStatus />
+      <CustomerInsideStatus userRole={userRole} />
     </>
   );
 }

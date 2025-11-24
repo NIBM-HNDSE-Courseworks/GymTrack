@@ -1,57 +1,46 @@
-/* src/components/UltrasonicTracker.css */
+/* === GitHub Dark Minimal Panel === */
 
-/* --- Card/Group Styling (Shared across all trackers) --- */
-.tracker-group {
-  /* Aligned with minimalist dark theme components */
+.tracker-card-panel {
+  background: #161b22;
   border: 1px solid #30363d;
-  background-color: #161b22;
-  border-radius: 10px;
+  border-radius: 14px;
   padding: 20px;
-  /* Removed max-width/width to allow it to fully integrate into the dashboard-grid */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
-  width: 100%; /* Ensure it fills the grid cell */
-}
-
-.group-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 2px solid #30363d;
-  padding-bottom: 10px;
-  margin-bottom: 15px;
-}
-
-.group-header h2 {
-  /* MODIFIED: Use the blue accent for primary titles */
-  font-size: 1.4em;
-  color: #58a6ff;
-  margin: 0;
-}
-
-.tracker-card {
-  padding: 10px 0;
-  text-align: left;
-  color: #c9d1d9; /* Standard light text color */
-}
-
-.tracker-card h3 {
-  /* MODIFIED: Use standard light text color, bold font is implicit for headings */
   color: #c9d1d9;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-shadow: 0px 8px 22px rgba(0,0,0,0.55);
 }
 
-.status-indicator {
+/* HEADER */
+.panel-header h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #58a6ff;
+  margin: 0 0 6px 0;
+}
+
+/* VALUE BOX */
+.value-box label {
+  font-size: 0.9rem;
+  color: #8b949e;
+}
+
+.value-number {
+  margin-top: 4px;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #e6edf3;
+}
+
+/* STATUS */
+.status-pill {
+  margin-top: 6px;
   padding: 12px;
-  border-radius: 4px;
   text-align: center;
-  margin: 10px 0;
-  font-size: 1.2em;
-  /* MODIFIED: Status indicators must use functional colors (red/green) but text must contrast well */
-  color: #0d1117; 
-  font-weight: bold;
-}
-
-.logic-note {
-  font-size: 0.85em;
-  color: #8b949e; /* Muted gray for secondary information */
-  margin-top: 15px;
+  border-radius: 10px;
+  font-weight: 700;
+  color: #0d1117;
+  font-size: 1rem;
 }

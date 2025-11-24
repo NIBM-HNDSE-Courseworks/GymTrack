@@ -10,8 +10,8 @@
 #include <time.h>
 
 // ------------------ WiFi ------------------
-#define WIFI_SSID "Murdock A05s"
-#define WIFI_PASSWORD "20060905"
+#define WIFI_SSID "HUAWEI MATE 40 PRO"
+#define WIFI_PASSWORD "qwertyuiop"
 
 // ------------------ Firebase ------------------
 #define FIREBASE_HOST "smartgymtracker-4123b-default-rtdb.firebaseio.com"

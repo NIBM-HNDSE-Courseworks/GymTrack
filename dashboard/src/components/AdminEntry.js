@@ -2,10 +2,10 @@
 import React, { useState } from "react";
 import "./AuthModal.css";
 
-// 1. Rename 'onLoginSuccess' to 'onLogin' in the function signature
 function AdminEntry({ onLogin, onClose }) {
   const [adminPassword, setAdminPassword] = useState("");
   const [error, setError] = useState("");
+  const [isClosing, setIsClosing] = useState(false);
 
   const CORRECT_ADMIN_PASSWORD = "admin123";
 
@@ -13,21 +13,33 @@ function AdminEntry({ onLogin, onClose }) {
     e.preventDefault();
     setError("");
     if (adminPassword === CORRECT_ADMIN_PASSWORD) {
-      console.log("Admin password accepted.");
-      // 2. Rename 'onLoginSuccess()' to 'onLogin()'
-      onLogin(); // Switch to the staff dashboard
+      onLogin();
     } else {
       setError("Invalid admin password.");
       setAdminPassword("");
     }
   };
 
+  const handleCloseWithAnimation = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+    }, 300); // matches fade-out duration
+  };
+
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="auth-card" onClick={(e) => e.stopPropagation()}>
-        <button className="close-button" onClick={onClose}>
+    <div
+      className={`modal-overlay ${isClosing ? "closing" : ""}`}
+      onClick={handleCloseWithAnimation}
+    >
+      <div
+        className={`auth-card ${isClosing ? "closing" : ""}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button className="close-button" onClick={handleCloseWithAnimation}>
           &times;
         </button>
+
         <form className="auth-form" onSubmit={handleSubmit}>
           <h2>Admin Access</h2>
           <p className="note">
@@ -40,6 +52,7 @@ function AdminEntry({ onLogin, onClose }) {
           <input
             type="password"
             id="adminPass"
+            placeholder="Enter admin password..."
             value={adminPassword}
             onChange={(e) => setAdminPassword(e.target.value)}
             required

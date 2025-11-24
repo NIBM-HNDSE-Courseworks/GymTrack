@@ -4,53 +4,51 @@ import { ref, onValue } from "firebase/database";
 import { db } from "../Firebase";
 import "./UltrasonicTracker.css";
 
-function UltrasonicTracker({ equipmentId }) {
+function UltrasonicTracker() {
   const [state, setState] = useState("FREE");
-  const [distance, setDistance] = useState(0); // Optional: if you later save distance in Firebase
+  const [distance, setDistance] = useState(0);
 
-  // Color mapping
   const statusColor =
     {
       FREE: "#2ecc71",
-      "IN USE": "red",
-    }[state] || "black";
+      "IN USE": "#f5a623",
+    }[state] || "#6e7681";
 
   useEffect(() => {
-    if (!equipmentId) return;
-
-    // Firebase path: /equipment/bench1/status
     const statusRef = ref(db, `/equipment/bench1/status`);
+    const distanceRef = ref(db, `/equipment/bench1/distance`);
 
-    // Listen to Firebase LIVE updates
-    const unsubscribe = onValue(statusRef, (snapshot) => {
+    const unsub1 = onValue(statusRef, (snapshot) => {
       const value = snapshot.val();
-
-      // 0 → FREE | 1 → OCCUPIED
-      if (value === 1) setState("IN USE");
-      else setState("FREE");
+      setState(value === 1 ? "IN USE" : "FREE");
     });
 
-    return () => unsubscribe();
-  }, [equipmentId]);
+    const unsub2 = onValue(distanceRef, (snapshot) => {
+      const value = snapshot.val();
+      setDistance(value || 0);
+    });
+
+    return () => {
+      unsub1();
+      unsub2();
+    };
+  }, []);
 
   return (
-    <div className="tracker-group tracker-card">
-      <div className="group-header">
-        <h2>🏋 Bench (01)</h2>
-        
+    <div className="tracker-card-panel">
+      <div className="panel-header">
+        <h2>Bench 01</h2>
       </div>
 
-      <div className="tracker-card-content">
-        <h3>{equipmentId}</h3>
-       
+      {/* DISTANCE */}
+      <div className="value-box">
+        <label>Detected Distance</label>
+        <div className="value-number">{distance} cm</div>
+      </div>
 
-        <div
-          className="status-indicator"
-          style={{ backgroundColor: statusColor }}
-        >
-          Current State: {state}
-        </div>
-
+      {/* STATUS */}
+      <div className="status-pill" style={{ backgroundColor: statusColor }}>
+        Status: {state}
       </div>
     </div>
   );

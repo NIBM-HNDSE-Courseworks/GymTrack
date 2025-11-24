@@ -1,0 +1,52 @@
+/* === GitHub Dark Minimal Panel === */
+
+.crowded-card-panel {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 14px;
+  padding: 20px;
+  color: #c9d1d9;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-shadow: 0px 8px 22px rgba(0,0,0,0.55);
+}
+
+.crowded-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #58a6ff;
+  margin: 0;
+}
+
+/* STATUS PILL */
+.crowded-status-pill {
+  padding: 14px;
+  text-align: center;
+  border-radius: 10px;
+}
+
+.crowded-status-text {
+  color: #0d1117;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+/* CAPACITY TEXT */
+.crowded-label {
+  color: #58a6ff;
+  font-size: 1rem;
+  margin-bottom: 6px;
+}
+
+.crowded-count {
+  font-size: 4rem;
+  font-weight: 900;
+  color: #e6edf3;
+}
+
+.crowded-subtext {
+  color: #8b949e;
+  margin-top: 4px;
+}

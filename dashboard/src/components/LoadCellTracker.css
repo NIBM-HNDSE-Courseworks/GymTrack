@@ -1,63 +1,56 @@
-/* src/components/LoadCellTracker.css (Additions to existing styles) */
+/* === GitHub Dark Minimal Panel Theme === */
 
-/* --- Simplified Load Cell Card Layout --- */
-.simplified-loadcell {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+.tracker-card-panel {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 14px;
+  padding: 20px;
+  color: #c9d1d9;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-shadow: 0px 8px 22px rgba(0,0,0,0.55);
 }
 
-.loadcell-reading-box {
-    text-align: center;
-    padding: 10px 0;
-    border-bottom: 1px dotted #30363d;
+/* HEADER */
+.panel-header h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #58a6ff;
+  margin: 0 0 6px 0;
 }
 
-.reading-label {
-    color: #8b949e; /* Muted gray for the label */
-    font-size: 1em;
-    margin-bottom: 5px;
+/* LOADING BOX */
+.loading-box {
+  text-align: center;
+  padding: 14px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  color: #8b949e;
 }
 
-.reading-value {
-    color: white; 
-    font-size: 2.2em; /* Prominent display for the weight */
-    font-weight: 700;
+/* VALUE DISPLAY */
+.value-box label {
+  font-size: 0.9rem;
+  color: #8b949e;
 }
 
-.simplified-status {
-    /* Ensures the status indicator remains bold and clear */
-    padding: 12px;
+.value-number {
+  margin-top: 4px;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #e6edf3;
 }
 
-/* Ensure existing base styles are also present: */
-.tracker-group {
-    border: 1px solid #30363d;
-    background-color: #161b22;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
-    width: 100%;
-    margin: 10px 0;
-}
-
-.group-header h2 {
-    font-size: 1.4em;
-    color: #58a6ff;
-    margin: 0;
-}
-
-.tracker-card {
-    padding: 10px 0;
-    text-align: left;
-    color: #c9d1d9;
-}
-
-.status-indicator {
-    padding: 12px;
-    border-radius: 4px;
-    text-align: center;
-    font-size: 1.2em;
-    color: #0d1117; 
-    font-weight: bold;
+/* STATUS */
+.status-pill {
+  margin-top: 6px;
+  padding: 12px;
+  text-align: center;
+  border-radius: 10px;
+  font-weight: 700;
+  color: #0d1117;
+  font-size: 1rem;
 }

@@ -103,7 +103,7 @@ function App() {
         <div className="dashboard-layout">
           {/* LEFT SIDE */}
           <div className="left-panel">
-            <RFIDCapacity />
+            <RFIDCapacity userRole={userRole} />
           </div>
 
           {/* RIGHT SIDE (ALL EQUAL HEIGHT) */}
@@ -134,7 +134,7 @@ function App() {
         <div className="dashboard-layout">
           {/* LEFT SIDE */}
           <div className="left-panel">
-            <RFIDCapacity />
+            <RFIDCapacity userRole={userRole} />
           </div>
 
           {/* RIGHT SIDE */}

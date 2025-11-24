@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./AddRFIDEquipmentModal.css";
 import { db } from "../Firebase";
-import { ref, onValue, set } from "firebase/database";
+import { ref, get, set } from "firebase/database";
 
 function AddRFIDEquipmentModal({ onClose }) {
   const [pendingList, setPendingList] = useState([]);
@@ -9,24 +9,52 @@ function AddRFIDEquipmentModal({ onClose }) {
   const [selectedRFID, setSelectedRFID] = useState(null);
   const [equipmentName, setEquipmentName] = useState("");
   const [isReloading, setIsReloading] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+
+  // CLOSE WITH ANIMATION
+  const triggerClose = () => {
+    setIsClosing(true);
+    setTimeout(() => onClose(), 300); // matches CSS closing animation
+  };
 
   useEffect(() => {
-    const pendingRef = ref(db, "pending_items");
-    const equipmentRef = ref(db, "equipment");
-    setIsReloading(true);
+    let isMounted = true;
 
-    // Load pending list
-    onValue(pendingRef, (snap) => {
-      const data = snap.val() || {};
-      setPendingList(Object.values(data));
-      setIsReloading(false);
-    });
+    const loadData = async () => {
+      if (!isMounted) return;
 
-    // Load equipment list
-    onValue(equipmentRef, (snap) => {
-      const data = snap.val() || {};
-      setEquipmentList(Object.values(data));
-    });
+      setIsReloading(true);
+
+      try {
+        const [pendingSnap, equipmentSnap] = await Promise.all([
+          get(ref(db, "pending_items")),
+          get(ref(db, "equipment")),
+        ]);
+
+        if (!isMounted) return;
+
+        const pendingData = pendingSnap.exists() ? pendingSnap.val() : {};
+        const equipmentData = equipmentSnap.exists() ? equipmentSnap.val() : {};
+
+        setPendingList(Object.values(pendingData));
+        setEquipmentList(Object.values(equipmentData));
+      } catch (err) {
+        console.error("Error loading equipment modal data:", err);
+      } finally {
+        setTimeout(() => {
+          if (isMounted) setIsReloading(false);
+        }, 500);
+      }
+    };
+
+    loadData();
+
+    const intervalId = setInterval(loadData, 3000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
   }, []);
 
   const handleConnect = async () => {
@@ -35,41 +63,48 @@ function AddRFIDEquipmentModal({ onClose }) {
 
     const rfid = selectedRFID.rfid_tag;
 
-    // Save equipment data
-    await set(ref(db, `equipment/${rfid}`), {
-      rfid_tag: rfid,
-      equipment_name: equipmentName,
-      equipment_id: `EQP_${rfid.substring(0, 4)}`,
-      initial_location: "Equipment Area",
-      status: "ACTIVE",
-      timestamp: Date.now(),
-    });
+    try {
+      await set(ref(db, `equipment/${rfid}`), {
+        rfid_tag: rfid,
+        equipment_name: equipmentName,
+        equipment_id: `EQP_${rfid.substring(0, 4)}`,
+        initial_location: "Equipment Area",
+        status: "ACTIVE",
+        timestamp: Date.now(),
+      });
 
-    // Update pending list status only
-    await set(ref(db, `pending_items/${rfid}`), {
-      ...selectedRFID,
-      status: "NAME_ASSIGNED",
-      equipment_name: equipmentName,
-    });
+      await set(ref(db, `pending_items/${rfid}`), {
+        ...selectedRFID,
+        status: "NAME_ASSIGNED",
+        equipment_name: equipmentName,
+      });
 
-    alert("Equipment assigned successfully!");
-    setSelectedRFID(null);
-    setEquipmentName("");
+      alert("Equipment assigned successfully!");
+      setSelectedRFID(null);
+      setEquipmentName("");
+    } catch (err) {
+      console.error("Error assigning equipment:", err);
+      alert("Failed to assign equipment.");
+    }
   };
 
-  // Show pending items whose status is PENDING_NAME_ASSIGNMENT AND exist in equipment
   const filteredPending = pendingList.filter(
     (p) => p.status === "PENDING_NAME_ASSIGNMENT"
   );
 
-  // Show assigned equipment only if RFID exists in pending_items
   const filteredAssigned = equipmentList.filter((e) =>
     pendingList.some((p) => p.rfid_tag === e.rfid_tag)
   );
 
   return (
-    <div className="modal-overlay">
-      <div className="modal">
+    <div
+      className={`modal-overlay ${isClosing ? "closing" : ""}`}
+      onClick={triggerClose}
+    >
+      <div
+        className={`modal ${isClosing ? "closing" : ""}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="reload-status">
           <span className={`reload-icon ${isReloading ? "reloading" : ""}`}>
             ⟳
@@ -81,7 +116,6 @@ function AddRFIDEquipmentModal({ onClose }) {
 
         <h2>Assign RFID to Equipment</h2>
 
-        {/* PENDING LIST */}
         <div className="pending-section">
           <h3>Pending RFID Tags</h3>
           <div className="list">
@@ -108,7 +142,6 @@ function AddRFIDEquipmentModal({ onClose }) {
           </div>
         </div>
 
-        {/* INPUT */}
         <div className="input-row">
           <label>Equipment Name</label>
           <input
@@ -119,32 +152,32 @@ function AddRFIDEquipmentModal({ onClose }) {
           />
         </div>
 
-        {/* BUTTONS */}
         <div className="connect-row">
           <button className="btn connect" onClick={handleConnect}>
             CONNECT
           </button>
-          <button className="btn cancel" onClick={onClose}>
+          <button className="btn cancel" onClick={triggerClose}>
             CLOSE
           </button>
         </div>
 
-        {/* ASSIGNED LIST */}
         <div className="assigned-section">
           <h3>Assigned Equipment</h3>
-          {filteredAssigned.length === 0 ? (
-            <div className="list-empty">No equipment assigned yet</div>
-          ) : (
-            filteredAssigned.map((e) => (
-              <div key={e.rfid_tag} className="assignment-row">
-                <strong>{e.equipment_name}</strong>
-                <br />
-                ID: {e.equipment_id}
-                <br />
-                RFID: {e.rfid_tag}
-              </div>
-            ))
-          )}
+          <div className="list">
+            {filteredAssigned.length === 0 ? (
+              <div className="list-empty">No equipment assigned yet</div>
+            ) : (
+              filteredAssigned.map((e) => (
+                <div key={e.rfid_tag} className="assignment-row">
+                  <strong>{e.equipment_name}</strong>
+                  <br />
+                  ID: {e.equipment_id}
+                  <br />
+                  RFID: {e.rfid_tag}
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
