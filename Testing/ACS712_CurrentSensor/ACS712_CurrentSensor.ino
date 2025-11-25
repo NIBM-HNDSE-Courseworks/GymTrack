@@ -6,8 +6,8 @@
 #include <FirebaseESP8266.h>
 
 // --- WiFi ---
-#define WIFI_SSID "Hirantha's Galaxy M31"
-#define WIFI_PASSWORD "Hira@2413"
+#define WIFI_SSID "Galaxy M31FEE9"
+#define WIFI_PASSWORD "rrnz1795"
 
 // --- Firebase ---
 #define FIREBASE_HOST "smartgymtracker-4123b-default-rtdb.firebaseio.com"
@@ -21,7 +21,8 @@
 // Adjust this threshold based on testing. 
 // A value above this will indicate the motor is drawing current (i.e., in use).
 // Typical idle noise on A0 might be around 0-50. A motor running will be much higher.
-const int USAGE_THRESHOLD = 10; // Analog value (0-1023). **Tune this!**
+const int ZERO_CURRENT_ADC_VALUE = 535;
+const int USAGE_THRESHOLD = 100; // Analog value (0-1023). **Tune this!**
 
 // Firebase objects
 FirebaseData firebaseData;
@@ -100,20 +101,27 @@ void updateFirebase(int reading, String status) {
 // -----------------------------------------------------
 // Main Loop
 // -----------------------------------------------------
+// -----------------------------------------------------
+// Main Loop
+// -----------------------------------------------------
 void loop() {
+  // 1. Read the sensor and declare the status variable
   int rawReading = getCurrentReading();
+  String status; // Declare the status variable here.
 
   Serial.println("--------------------------");
   Serial.println("Raw Reading (A0): " + String(rawReading));
+    
+  // 2. NEW LOGIC: Check for deviation from the zero-current center point
+  // The 'status' variable is assigned a value in the blocks below.
+  if (rawReading > (ZERO_CURRENT_ADC_VALUE + USAGE_THRESHOLD) || 
+      rawReading < (ZERO_CURRENT_ADC_VALUE - USAGE_THRESHOLD)) {
+    status = "AVAILABLE"; // Current is flowing (Switch is ON)
+  } else {
+    status = "UNAVAILABLE"; // No current flow (Switch is OFF)
+  }
 
-  // **NEW LOGIC:**
-  // Motor is WORKING (drawing current) -> status is "IN_USE"
-  // Motor is NOT WORKING (no current) -> status is "AVAILABLE"
-
-  // Check if the reading is above the usage threshold
-  // The logic is inverted from the load cell: High current = In Use / Unavailable
-  String status = (rawReading >= USAGE_THRESHOLD) ? "UNAVAILABLE" : "AVAILABLE";
-  
+  // 3. Update Firebase with the calculated status
   updateFirebase(rawReading, status);
 
   delay(300); // update every 1 sec
