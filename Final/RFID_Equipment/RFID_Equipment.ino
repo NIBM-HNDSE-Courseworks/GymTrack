@@ -17,11 +17,11 @@ FirebaseAuth auth;
 FirebaseConfig config;
 
 // --- PIN DEFINITIONS ---
-#define RST_PIN_1 D3    // Reader 1: EQUIPMENT Area (Docking Station)
+#define RST_PIN_1 D3    // Reader 1: EQUIPMENT Area 
 #define SS_PIN_1 D8
-#define RST_PIN_2 D4    // Reader 2: Dumbbell Space (Free Space)
+#define RST_PIN_2 D4    // Reader 2: Dumbbell Space 
 #define SS_PIN_2 D2
-#define RST_PIN_3 D0    // Reader 3: Free Area (Dumbbell Area)
+#define RST_PIN_3 D0    // Reader 3: Free Area 
 #define SS_PIN_3 D1
 
 // Create three MFRC522 instances
@@ -67,8 +67,6 @@ bool pathExists(const String &path) {
     if (Firebase.get(firebaseData, path)) {
         // dataType will be "null" if key doesn't exist
         String dt = firebaseData.dataType();
-        // Debug print
-        // Serial.print("[DEBUG] pathExists("); Serial.print(path); Serial.print(") dataType="); Serial.println(dt);
         return dt != "null";
     } else {
         Serial.print("[ERROR] Firebase GET failed for ");
@@ -89,7 +87,7 @@ void updateEquipmentLocation(const String &tagId, const String &location) {
     json.set("rfid_tag", tagId);
     json.set("location", location);
     // Keep existing name if present in DB — we'll not touch it here.
-    // Timestamp as millis() (or you can use epoch seconds if you prefer)
+    // Timestamp as millis()
     json.set("timestamp", (int)millis());
 
     Serial.print("[FIREBASE] Updating equipment location for ");
@@ -97,7 +95,7 @@ void updateEquipmentLocation(const String &tagId, const String &location) {
     Serial.print(" -> ");
     Serial.println(location);
 
-    // Use update (set will replace; update changes only fields provided)
+    // Use update
     if (Firebase.updateNode(firebaseData, path, json)) {
         Serial.println("[SUCCESS] Equipment location updated.");
     } else {
