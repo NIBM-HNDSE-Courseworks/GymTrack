@@ -86,12 +86,15 @@ function CustomerInsideStatus({ userRole }) {
         setLogData([]);
         return;
       }
+
       const logsArray = Object.values(data).map((entry) => ({
         ...entry,
         date: entry.timestamp.split("T")[0],
         hour: parseInt(entry.timestamp.split("T")[1].split(":")[0]),
       }));
+
       setLogData(logsArray);
+
       if (!selectedDate && logsArray.length > 0) {
         setSelectedDate(logsArray[logsArray.length - 1].date);
       }
@@ -141,10 +144,15 @@ function CustomerInsideStatus({ userRole }) {
   };
 
   // ---------------- LAST 7 DAYS PEAK CALC ----------------
-  const uniqueDates = [...new Set(logData.map((log) => log.date))].sort();
-  const last7Dates = uniqueDates.slice(-7);
+  const uniqueDates = [...new Set(logData.map((log) => log.date))];
 
-  const dailyPeaksRaw = last7Dates.map((day) => {
+  // → SORT dates newest → oldest
+  const sortedDates = uniqueDates.sort((a, b) => new Date(b) - new Date(a));
+
+  // → Take the latest 7 days
+  const last7Dates = sortedDates.slice(0, 7);
+
+  const dailyPeaks = last7Dates.map((day) => {
     const hourMap = {};
     for (let hr = 0; hr < 24; hr++) hourMap[hr] = new Set();
 
@@ -187,31 +195,19 @@ function CustomerInsideStatus({ userRole }) {
         month: "short",
         day: "numeric",
       }),
-      weekday: new Date(day).toLocaleDateString("en-US", { weekday: "long" }),
+      weekday: new Date(day).toLocaleDateString("en-US", {
+        weekday: "long",
+      }),
       peakRange: formattedRanges,
       count: maxVal,
     };
   });
 
-  const weekOrder = {
-    Monday: 1,
-    Tuesday: 2,
-    Wednesday: 3,
-    Thursday: 4,
-    Friday: 5,
-    Saturday: 6,
-    Sunday: 7,
-  };
-
-  const dailyPeaks = dailyPeaksRaw.sort(
-    (a, b) => weekOrder[a.weekday] - weekOrder[b.weekday]
-  );
-
   // Split customer list
   const leftColumn = customers.filter((_, i) => i % 2 === 0);
   const rightColumn = customers.filter((_, i) => i % 2 !== 0);
 
-  // UI
+  // UI RENDERING
   const renderContent = () => {
     if (isLoading)
       return (
@@ -285,11 +281,13 @@ function CustomerInsideStatus({ userRole }) {
               fontSize: "0.95em",
             }}
           >
-            {[...new Set(logData.map((log) => log.date))].map((date) => (
-              <option key={date} value={date}>
-                {date}
-              </option>
-            ))}
+            {[...new Set(logData.map((log) => log.date))]
+              .sort((a, b) => new Date(b) - new Date(a))
+              .map((date) => (
+                <option key={date} value={date}>
+                  {date}
+                </option>
+              ))}
           </select>
 
           <ResponsiveContainer width="480%" height={350}>
@@ -401,7 +399,7 @@ function CustomerInsideStatus({ userRole }) {
                     .classList.add("popup-closing");
                   setTimeout(() => {
                     setPopupVisible(false);
-                  }, 180); // match fade-out duration
+                  }, 180);
                 }}
               >
                 Close
