@@ -3,7 +3,7 @@
 
 ---
 
-## 1. Project Overview (Based on Provided Code)
+## 1. Project Overview
 **GymTrack** is an Internet of Things (IoT) solution where multiple **ESP8266** units are deployed to monitor specific aspects of gym equipment and member tracking. Each uploaded code file manages a distinct sensor or set of sensors to report a basic status and raw readings to a Firebase Realtime Database.
 
 **Implemented Functionalities:**
