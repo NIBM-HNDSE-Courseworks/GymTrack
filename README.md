@@ -1,109 +1,85 @@
-# 🏋️‍♂️ GymTrack: Enhanced Smart Gym Equipment Tracker  
+# 🏋️‍♂️ GymTrack: Core Sensor Implementation (Code Analysis)
 ### IoT Coursework Project
 
 ---
 
-## 1. Project Overview
-**GymTrack** is an Internet of Things (IoT) solution designed to monitor gym equipment usage and facility capacity in real-time.  
-By leveraging various sensors connected via an **ESP8266 microcontroller**, the system provides immediate feedback to customers regarding machine availability and generates insightful usage analytics for gym staff.
+## 1. Project Overview (Based on Provided Code)
+**GymTrack** is an Internet of Things (IoT) solution where multiple **ESP8266** units are deployed to monitor specific aspects of gym equipment and member tracking. Each uploaded code file manages a distinct sensor or set of sensors to report a basic status and raw readings to a Firebase Realtime Database.
 
-**Primary goals:**
-* Accurately track the state of high-value gym equipment (**FREE, IN USE, IDLE, MAINTENANCE**).  
-* Monitor facility crowding by tracking member entry/exit using **RFID User Tracking**.
-* Provide data for long-term facility analysis (e.g., peak hours, maintenance scheduling).  
-* Track gym accessories (e.g., dumbbells, mats, resistance bands) using **RFID Equipment Tracking** for loss prevention and equipment management.
-
----
-
-## 2. Hardware and Sensor Summary
-The system utilizes a central **ESP8266 microcontroller** for data acquisition, processing raw sensor inputs into meaningful status before transmission.
-
-| Equipment Type | Primary Sensor | Detection Mechanism | Data Output |
-|----------------|----------------|---------------------|--------------|
-| High-Traffic Area (e.g., Squat Rack) | **Ultrasonic Sensor (HC-SR04)** | Detects an object (person) standing within the defined usage zone. | Distance (cm), Presence detected (Boolean) |
-| Dumbbell Rack Slot (e.g., 20kg Dumbbell) | **Load Cell (MD0487)** | Measures weight/force to confirm if the dumbbell is present or removed. | Weight (kg), Dumbbell present (Boolean) |
-| Electric Equipment (e.g., Treadmill, Elliptical) | **ACS712 Current Sensor** | Measures current draw from the power line to detect when the machine is operating. | Current (A), Power ON/OFF (Boolean) |
-| **User Capacity Monitoring** | **RFID Tag + Reader (User Tracking)** | Member's card is scanned upon entry and exit to monitor facility occupancy. | Member ID, Location (Entry/Exit), Timestamp |
-| Gym Accessories/Inventory | **RFID Tag + Reader (Equipment Tracking)** | Each item is tagged; reader detects tag presence for real-time inventory and usage tracking. | Item ID, Presence (Boolean), Last Scan Time |
-| Microcontroller | **ESP8266 (Wi-Fi Enabled)** | Reads sensor data, applies initial logic, and sends data to the cloud API. | JSON payload via MQTT/HTTP |
+**Implemented Functionalities:**
+* **RFID Equipment Tracking (`RFID_Equipment.ino`):** Tracks the location of gym accessories across three defined areas and manages new item registration.
+* **Ultrasonic Sensor Tracking (`UltrasonicSensor_HC_SR04.ino`):** Determines the occupied/free status and minimum distance for a single piece of equipment (e.g., a bench).
+* **Current Sensor Tracking (`ACS712_CurrentSensor.ino`):** Monitors the current draw of an electrical machine to infer its usage status.
+* **Combined Load Cell & User RFID Tracking (`LoadCell_RFID_User.ino`):** Manages user entry/exit logs and tracks the weight/status of a single load cell-monitored equipment.
 
 ---
 
-## 3. Core Tracking Logic & Data States
-The tracking function on the **ESP8266** determines the current equipment status based on sensor readings and configured time windows.
+## 2. Hardware and Sensor Summary (Based on Provided Code)
+All projects use the **ESP8266 microcontroller** and connect to **Firebase** for data transmission.
 
-### A. Core Data States
-All monitored equipment reports one of the following four critical states:
-
-| State | Definition | Audience |
-|--------|-------------|-----------|
-| **FREE** | Ready for immediate use. | Customer/Staff |
-| **IN USE** | Currently being operated by a member. | Customer/Staff |
-| **IDLE** | Recently used (e.g., past 2 minutes) but currently empty. (Helps prevent machine “hogging”). | Staff/Analysis |
-| **MAINTENANCE** | Out of service due to technical issues or cleaning (set manually by staff). | Customer/Staff |
+| Code File | Primary Sensor | Equipment/Function | Data Output to Firebase |
+|----------------|----------------|---------------------|--------------------------|
+| `RFID_Equipment.ino` | **MFRC522 RFID Reader (x3)** | Gym Accessories / Inventory | `rfid_tag`, `location`, `timestamp`. [cite_start]**Logic:** Updates location or creates a `pending_items` entry for new tags. [cite: 157, 183, 195] |
+| `UltrasonicSensor_HC_SR04.ino` | **HC-SR04 Ultrasonic Sensor (x2)** | Bench/Space Occupancy | `/equipment/bench1/status` (0=FREE, 1=OCCUPIED), `/equipment/bench1/distance` (Minimum distance in cm). [cite_start]**Logic:** Status is 'OCCUPIED' if either sensor distance is $< 20$cm. [cite: 209, 211, 214] |
+| `ACS712_CurrentSensor.ino` | **ACS712 Current Sensor** | Electrical Equipment Usage | `/equipment/<id>/raw_sensor_reading` (0-1023), `/equipment/<id>/status` (AVAILABLE/UNAVAILABLE). **Logic:** Status is 'AVAILABLE' if reading deviates from `ZERO_CURRENT_ADC_VALUE` by more than `USAGE_THRESHOLD`. [cite: 228, 235, 236] |
+| `LoadCell_RFID_User.ino` | **HX711 Load Cell**, **MFRC522 RFID Reader (x1)** | Single Load-Bearing Equipment & User In/Out | `/equipment/load_cell_1/weight` (float), `/equipment/load_cell_1/status` (AVAILABLE/UNAVAILABLE), `/users_in_out_log` (User entry/exit logs). **Logic:** Load Cell status is 'AVAILABLE' if weight $\ge 500$g. [cite_start]User RFID logs in/out and updates the `/users/<cardID>/inside` status. [cite: 255, 273, 285] |
 
 ---
 
-### B. State Transition Examples
+## 3. Core Tracking Logic & Data States (Code-Specific)
+The logic in the uploaded files is primarily focused on direct sensor-to-status mapping and logging, rather than complex time-based state machines.
+
+### A. RFID Equipment Tracking (`RFID_Equipment.ino`)
+* [cite_start]**Readers:** Three readers are configured: `Equipment Area` (Reader 1), `Dumbbell Space` (Reader 2), and `Free Area` (Reader 3)[cite: 145, 146, 184, 185, 186].
+* [cite_start]**Priority:** Reader 1 is checked first, then Reader 2, then Reader 3[cite: 179, 180, 181].
+* **New Tag Handling:**
+    * [cite_start]**Reader 2:** New tag is **auto-created** in `/equipment/` with `name: "Dumbbell"`[cite: 192].
+    * [cite_start]**Reader 3:** New tag is **auto-created** in `/equipment/` with `name: "Other Equipment"`[cite: 194].
+    * [cite_start]**Reader 1:** New tag creates a **pending item** in `/pending_items/` for manual staff assignment[cite: 195].
+* [cite_start]**Existing Tag Handling:** If a tag exists in `/equipment/`, only its `location` and `timestamp` are updated[cite: 188, 189].
+
+### B. Ultrasonic Sensor Tracking (`UltrasonicSensor_HC_SR04.ino`)
+* [cite_start]**Threshold:** A presence is detected if the distance is less than $20$cm (`THRESHOLD_CM`)[cite: 209].
+* [cite_start]**Status:** `status` is set to **1 (OCCUPIED)** if $\text{dist}_1 < 20$cm **OR** $\text{dist}_2 < 20$cm; otherwise, it is **0 (FREE)**[cite: 209].
+* [cite_start]**Data Logged:** `/equipment/bench1/status` and `/equipment/bench1/distance` (which is $\min(\text{dist}_1, \text{dist}_2)$) are updated[cite: 212, 214].
+
+### C. Current Sensor Tracking (`ACS712_CurrentSensor.ino`)
+* [cite_start]**Zero Point:** The sensor is centered around an ADC value of $535$ (`ZERO_CURRENT_ADC_VALUE`)[cite: 220].
+* [cite_start]**Threshold:** Usage is detected if the raw reading deviates by more than $100$ (`USAGE_THRESHOLD`) from the zero point[cite: 235].
+* **Status Logic:**
+    * [cite_start]If $\text{rawReading} > (535 + 100)$ **OR** $\text{rawReading} < (535 - 100)$, the machine is considered **AVAILABLE** (Current is flowing / Switch is ON)[cite: 235].
+    * [cite_start]Otherwise, the machine is considered **UNAVAILABLE** (No current flow / Switch is OFF)[cite: 237].
+* [cite_start]**Data Logged:** `/equipment/<id>/raw\_sensor\_reading` (0-1023) and `/equipment/<id>/status` are updated[cite: 230].
+
+### D. Combined Load Cell & User RFID Tracking (`LoadCell_RFID_User.ino`)
+* **Load Cell Status:**
+    * [cite_start]`weight` is read and updated to Firebase[cite: 284, 255].
+    * [cite_start]`status` is **AVAILABLE** only if `weight` $\ge 500$g[cite: 285].
+* **User RFID Logic:**
+    * [cite_start]Scans card UID and checks if it's linked to a user in `/users/`[cite: 266, 269].
+    * [cite_start]**Unassigned Card:** Logs a `denied` action to `/users_in_out_log`[cite: 269, 271].
+    * [cite_start]**Assigned User:** Toggles the `/users/<cardID>/inside` state (0 $\to$ 1 or 1 $\to$ 0) [cite: 272, 273, 274] [cite_start]and pushes an `in` or `out` log entry to `/users_in_out_log`[cite: 277].
 
 ---
 
-**Ultrasonic Sensor (Presence) Logic**  
-* **FREE → IN USE:** If Distance reading indicates Presence = True for 10 consecutive seconds  
-* **IN USE → FREE:** If Distance reading indicates Presence = False for 5 consecutive seconds  
+## 4. Communication & Data Flow (Code-Specific)
+[cite_start]All systems use the **ESP8266** to read sensor data, apply the simple $\text{IF} / \text{ELSE}$ logic described above, and send the results to the **Firebase Realtime Database** over **WiFi**[cite: 159, 212, 230, 255].
+
+* [cite_start]**Libraries:** All projects use specific Firebase libraries (`FirebaseESP8266.h` or `Firebase_ESP_Client.h`) for communication.
+* [cite_start]**Authentication:** All projects use direct credentials (`FIREBASE_AUTH` token or `API_KEY` + `user/password`) for Firebase access[cite: 145, 197, 221, 244].
+* [cite_start]**Timestamping:** The Load Cell + RFID project uses **NTP** to get a precise ISO-formatted timestamp for logging, while others use `millis()`[cite: 158, 245, 257].
 
 ---
 
-**Load Cell (Equipment Presence) Logic**
-* **ITEM PRESENT → ITEM REMOVED:** If measured weight drops below the defined threshold for the item.
-* **ITEM REMOVED → ITEM PRESENT:** If measured weight is within the defined range for the item.
+## 5. Example Data Node Paths
 
----
-
-**Current Sensor Logic (Electrical Equipment Usage)**  
-* **FREE → IN USE:** If measured current > 0.5A for at least 3 seconds (indicates motor activity)  
-* **IN USE → IDLE:** If current < 0.5A continuously for 60 seconds  
-* **IDLE → FREE:** If current remains below 0.1A for 300 seconds (machine powered but unused)  
-* Periodic readings help monitor energy consumption and detect abnormal power draw for **maintenance alerts**.
-
----
-
-**RFID Tracking Logic**
-
-| Function | Logic | Data Logged |
+| Code File | Example Path | Data Sent |
 |---|---|---|
-| **Equipment Tracking** | *ITEM PRESENT → REMOVED*: Tag not detected near the item's station after 3 seconds. *REMOVED → PRESENT*: Tag re-detected at the station. | **Item ID**, **Location**, **Timestamp**, **Status** (Present/Removed) |
-| **User Tracking** | *ENTRY*: Member's card scanned at the gym entrance. *EXIT*: Member's card scanned at the gym exit. The system maintains a running count of currently present members. | **Member ID**, **Timestamp**, **Action** (Entry/Exit), **Gym Capacity Count** |
-
----
-
-## 4. Communication & Data Flow
-
-1.  **Sensor Layer:** All sensors (Ultrasonic, Load Cell, Current Sensor, RFID Readers) feed raw data into ESP8266 GPIO/ADC pins.  
-2.  **Processing Layer:** ESP8266 firmware interprets sensor signals, applies threshold logic, and updates equipment/user state.  
-3.  **Transmission Layer:** Data is sent to the cloud via **MQTT** or **HTTP POST** in structured JSON format.  
-4.  **Backend Layer:** Cloud server aggregates, analyzes, and visualizes data using a web dashboard or mobile interface.  
-
----
-
-## 5. Example JSON Data Packet
-
-```json
-{
-  "equipment_id": "TRD01",
-  "state": "IN_USE",
-  "sensor_data": {
-    "current": 2.3,
-    "power_status": "ON",
-    "presence": true,
-    "load_cell_weight": 0.0,
-    "rfid_item_id": "RFID_203A7C",
-    "rfid_status": "ITEM_PRESENT"
-  },
-  "user_data": {
-    "member_id": "MEM_456B",
-    "capacity_count": 45,
-    "capacity_status": "ENTRY"
-  },
-  "timestamp": "2025-11-19T10:30:00Z"
-}
+| `RFID_Equipment.ino` | `/equipment/5E0A73C9` | `{"location": "Equipment Area", "timestamp": 1234567, "rfid_tag": "5E0A73C9"}` |
+| | `/pending_items/1C42D305` | `{"initial_location": "Free Area", "status": "PENDING_NAME_ASSIGNMENT", ...}` |
+| `UltrasonicSensor_HC_SR04.ino` | `/equipment/bench1/status` | `1` (Integer) |
+| | `/equipment/bench1/distance` | `15` (Integer) |
+| `ACS712_CurrentSensor.ino` | `/equipment/motor_current_sensor_1/status` | `"AVAILABLE"` (String) |
+| `LoadCell_RFID_User.ino` | `/equipment/load_cell_1/weight` | `12.50` (Float) |
+| | `/users/F103A94D/inside` | `1` (Integer) |
+| | `/users_in_out_log/unique-key` | `{"customerName": "John Doe", "action": "in", "timestamp": "2025-11-29T16:30:55", ...}` |
